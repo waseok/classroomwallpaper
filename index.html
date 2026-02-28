@@ -310,14 +310,6 @@
     animation: none !important;
   }
 
-  .drop-placeholder {
-    border: 2px dashed rgba(59, 130, 246, 0.35);
-    border-radius: 18px;
-    background: rgba(59, 130, 246, 0.04);
-    margin-bottom: 1.2rem;
-    transition: height 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
-  }
-
   .rule-number {
     font-family: 'Outfit', sans-serif;
     font-weight: 900;
@@ -1171,7 +1163,12 @@ function saveTimetable() {
 function loadSettings() {
   try {
     const s = localStorage.getItem('classroomSettings');
-    if (s) settings = JSON.parse(s);
+    if (s) {
+      const saved = JSON.parse(s);
+      settings = { ...settings, ...saved };
+      if (!settings.dailyPeriods) settings.dailyPeriods = { 1:5, 2:6, 3:5, 4:5, 5:5 };
+      if (settings.chimeEnabled === undefined) settings.chimeEnabled = true;
+    }
   } catch { /* keep defaults */ }
 }
 function saveSettings() { localStorage.setItem('classroomSettings', JSON.stringify(settings)); }
@@ -1537,6 +1534,7 @@ function addTimetableEntry() {
 }
 
 function resetTimetable() {
+  if (!confirm('시간표를 기본값으로 초기화할까요?')) return;
   timetable = JSON.parse(JSON.stringify(DEFAULT_TIMETABLE));
   saveTimetable();
   renderTimetableEditor();
@@ -1557,7 +1555,6 @@ function startTtDrag(e, index, rowEl) {
 
   ttDrag = {
     active: true, rowEl, index, currentIndex: index,
-    startX: e.clientX,
     startY: e.clientY,
     cardRects: rects, cardH, rows,
   };
@@ -1572,7 +1569,7 @@ function startTtDrag(e, index, rowEl) {
 
 function onTtDragMove(e) {
   if (!ttDrag.active) return;
-  const { rowEl, startX, startY, index, rows, cardRects, cardH } = ttDrag;
+  const { rowEl, startY, index, rows, cardRects, cardH } = ttDrag;
 
   const dy = e.clientY - startY;
   rowEl.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
@@ -1974,7 +1971,12 @@ function updateClock() {
       } else {
         remText = remSec + '초';
       }
-      alertEl.innerHTML = period.label + ' <span class="remaining-time">(' + remText + ' 남음)</span>';
+      alertEl.textContent = '';
+      alertEl.appendChild(document.createTextNode(period.label + ' '));
+      const remSpan = document.createElement('span');
+      remSpan.className = 'remaining-time';
+      remSpan.textContent = '(' + remText + ' 남음)';
+      alertEl.appendChild(remSpan);
     } else {
       alertEl.textContent = period.label;
     }

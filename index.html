@@ -485,6 +485,63 @@
     transform: rotate(30deg);
   }
 
+  /* ========== Fullscreen Button ========== */
+  .fullscreen-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 4.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: rgba(0,0,0,0.35);
+    transition: all 0.3s;
+    z-index: 10;
+  }
+  .fullscreen-btn:hover {
+    background: rgba(255,255,255,0.8);
+    color: rgba(0,0,0,0.6);
+  }
+
+  /* ========== Data Management ========== */
+  .data-manage-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+  .data-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.5);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: rgba(0,0,0,0.55);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .data-btn:hover {
+    background: rgba(255,255,255,0.8);
+    color: rgba(0,0,0,0.75);
+  }
+  .data-btn-primary {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.25);
+  }
+  .data-btn-primary:hover {
+    background: rgba(59, 130, 246, 0.2);
+    color: #2563eb;
+  }
+
   /* ========== Modal ========== */
   .modal-overlay {
     position: fixed;
@@ -1028,6 +1085,9 @@
 </div>
 
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
+<button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="전체화면">&#x26F6;</button>
+
+<input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
 
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeSettings()">
   <div class="modal-card">
@@ -1070,6 +1130,14 @@
       <button class="tt-add-btn" onclick="addTimetableEntry()">+ 새 시간 추가</button>
       <div class="tt-bottom-row">
         <button class="tt-reset-btn" onclick="resetTimetable()">기본값으로 초기화</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">데이터 관리</div>
+      <div class="data-manage-row">
+        <button class="data-btn data-btn-primary" onclick="exportData()">&#128190; 내보내기</button>
+        <button class="data-btn" onclick="document.getElementById('importFileInput').click()">&#128194; 불러오기</button>
       </div>
     </div>
   </div>
@@ -1984,6 +2052,77 @@ function updateClock() {
     alertEl.textContent = period.label;
   }
 }
+
+// =============================================
+// DATA EXPORT / IMPORT
+// =============================================
+function exportData() {
+  const data = {
+    classroomRules: localStorage.getItem('classroomRules'),
+    classroomTimetable: localStorage.getItem('classroomTimetable'),
+    classroomSettings: localStorage.getItem('classroomSettings'),
+    classroomViewData: localStorage.getItem('classroomViewData')
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const now = new Date();
+  const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  a.download = 'classroom-backup-' + stamp + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('백업 파일이 다운로드되었습니다');
+}
+
+function importData() {
+  document.getElementById('importFileInput').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!confirm('현재 데이터를 덮어쓰게 됩니다. 계속할까요?')) {
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const keys = ['classroomRules', 'classroomTimetable', 'classroomSettings', 'classroomViewData'];
+      keys.forEach(function(key) {
+        if (data[key] !== undefined && data[key] !== null) {
+          localStorage.setItem(key, data[key]);
+        }
+      });
+      location.reload();
+    } catch (err) {
+      alert('파일을 읽는 중 오류가 발생했습니다. 올바른 백업 파일인지 확인해주세요.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// =============================================
+// FULLSCREEN
+// =============================================
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(function() {});
+  } else {
+    document.exitFullscreen().catch(function() {});
+  }
+}
+
+document.addEventListener('fullscreenchange', function() {
+  var btn = document.getElementById('fullscreenBtn');
+  btn.innerHTML = document.fullscreenElement ? '&#x2716;' : '&#x26F6;';
+  btn.title = document.fullscreenElement ? '전체화면 해제' : '전체화면';
+});
 
 // =============================================
 // INIT

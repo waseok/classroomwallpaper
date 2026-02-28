@@ -1112,6 +1112,13 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
+      <div class="toggle-row">
+        <span class="toggle-label">콜론 깜빡임</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="colonBlinkToggle" onchange="toggleColonBlink()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
     <div class="settings-section">
@@ -1177,7 +1184,7 @@ const DEFAULT_TIMETABLE = [
 let rules = [];
 let isEditing = false;
 let timetable = [];
-let settings = { showRemaining: true, chimeEnabled: true, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
+let settings = { showRemaining: true, chimeEnabled: true, colonBlink: true, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
 let viewData = { activeTab: 'rules', notebook: '', notices: [] };
 let lastPeriodLabel = null;
 let lastChimeTime = 0;
@@ -1236,6 +1243,7 @@ function loadSettings() {
       settings = { ...settings, ...saved };
       if (!settings.dailyPeriods) settings.dailyPeriods = { 1:5, 2:6, 3:5, 4:5, 5:5 };
       if (settings.chimeEnabled === undefined) settings.chimeEnabled = true;
+      if (settings.colonBlink === undefined) settings.colonBlink = true;
     }
   } catch { /* keep defaults */ }
 }
@@ -1458,6 +1466,7 @@ function openSettings() {
   document.getElementById('settingsModal').classList.add('open');
   document.getElementById('showRemainingToggle').checked = settings.showRemaining;
   document.getElementById('chimeToggle').checked = settings.chimeEnabled;
+  document.getElementById('colonBlinkToggle').checked = settings.colonBlink;
   renderDailyPeriods();
   renderTimetableEditor();
 }
@@ -1894,6 +1903,18 @@ function toggleChime() {
   saveSettings();
 }
 
+function toggleColonBlink() {
+  settings.colonBlink = document.getElementById('colonBlinkToggle').checked;
+  applyColonBlink();
+  saveSettings();
+}
+
+function applyColonBlink() {
+  document.querySelectorAll('.colon').forEach(el => {
+    el.style.animationName = settings.colonBlink ? 'colonBlink' : 'none';
+  });
+}
+
 // =============================================
 // DAILY PERIODS SETTINGS
 // =============================================
@@ -2007,7 +2028,7 @@ function updateClock() {
   const ampm = h < 12 ? '오전' : '오후';
   h = h % 12 || 12;
   document.getElementById('timeDisplay').innerHTML =
-    h + '<span class="colon">:</span>' + String(n.getMinutes()).padStart(2, '0');
+    h + '<span class="colon" style="animation-name:' + (settings.colonBlink ? 'colonBlink' : 'none') + '">:</span>' + String(n.getMinutes()).padStart(2, '0');
   document.getElementById('ampmDisplay').textContent = ampm;
   document.getElementById('secondsDisplay').textContent = ': ' + String(n.getSeconds()).padStart(2, '0');
   document.getElementById('dateDisplay').textContent =

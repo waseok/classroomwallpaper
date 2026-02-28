@@ -187,6 +187,7 @@
   .right-panel {
     padding: 2.5rem 2.5rem 2.5rem 3rem;
     align-items: flex-start;
+    justify-content: flex-start;
     overflow-y: auto;
   }
 
@@ -777,6 +778,183 @@
   .tt-row.tt-shift-up {
     transform: translateY(calc(-1 * (var(--tt-card-h) + 0.5rem))) !important;
   }
+
+  /* ========== Tab Bar ========== */
+  .tab-bar {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    animation: fadeSlideUp 1s ease-out 0.2s both;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: 14px;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.4);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    color: rgba(0,0,0,0.35);
+    cursor: pointer;
+    transition: all 0.3s;
+    backdrop-filter: blur(8px);
+  }
+  .tab-btn:hover { background: rgba(255,255,255,0.7); color: rgba(0,0,0,0.55); }
+  .tab-btn.active[data-tab="rules"] {
+    background: rgba(217, 78, 0, 0.1); color: #d94e00; border-color: rgba(217, 78, 0, 0.3);
+  }
+  .tab-btn.active[data-tab="notebook"] {
+    background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.3);
+  }
+  .tab-btn.active[data-tab="notice"] {
+    background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border-color: rgba(139, 92, 246, 0.3);
+  }
+  .tab-content { width: 100%; }
+
+  /* ========== Notebook ========== */
+  .notebook-textarea {
+    width: 100%;
+    min-height: 400px;
+    padding: 1.4rem 1.8rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #2d2a26;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  }
+  .notebook-textarea:focus {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04), 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  .notebook-textarea::placeholder { color: rgba(0,0,0,0.25); }
+
+  .notebook-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+  .notebook-toolbar-label {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: rgba(0,0,0,0.35);
+    margin-right: 0.2rem;
+  }
+  .font-size-btn {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    color: rgba(0,0,0,0.45);
+    transition: all 0.2s;
+  }
+  .font-size-btn:hover { background: rgba(255,255,255,0.9); color: #3b82f6; border-color: rgba(59,130,246,0.3); }
+  .font-size-display {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #3b82f6;
+    min-width: 36px;
+    text-align: center;
+  }
+
+  /* ========== Notice Cards ========== */
+  .notice-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    backdrop-filter: blur(12px);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .notice-card:hover { background: rgba(255,255,255,0.85); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+  .notice-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #8b5cf6; margin-top: 0.45rem; flex-shrink: 0;
+  }
+  .notice-content {
+    flex: 1; min-width: 0; outline: none;
+    font-size: 1.1rem; line-height: 1.6; color: #2d2a26;
+    border-radius: 6px; padding: 2px 6px; transition: background 0.2s;
+  }
+  .notice-content:focus { background: #fff; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3); }
+  .notice-delete-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: none;
+    background: rgba(0,0,0,0.05); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: #999; transition: all 0.2s; flex-shrink: 0;
+  }
+  .notice-delete-btn:hover { background: #fee2e2; color: #ef4444; }
+  .add-notice-btn {
+    width: 100%; padding: 1rem; border-radius: 18px;
+    border: 2px dashed rgba(139, 92, 246, 0.2); background: transparent;
+    cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1rem; font-weight: 700; color: rgba(139, 92, 246, 0.4);
+    transition: all 0.3s; margin-top: 0.5rem;
+  }
+  .add-notice-btn:hover { border-color: #8b5cf6; color: #8b5cf6; background: rgba(139, 92, 246, 0.04); }
+
+  /* ========== Daily Periods ========== */
+  .daily-periods-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem;
+  }
+  .daily-period-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+    padding: 0.7rem 0.5rem; background: rgba(255,255,255,0.6);
+    border-radius: 12px; border: 1px solid rgba(255,255,255,0.8);
+  }
+  .daily-period-label { font-weight: 900; font-size: 0.85rem; color: #333; }
+  .daily-period-select {
+    font-family: 'Noto Sans KR', sans-serif; font-size: 0.85rem; font-weight: 700;
+    padding: 0.3rem 0.4rem; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.8); outline: none; cursor: pointer; text-align: center;
+  }
+  .daily-period-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+
+  /* ========== Auto Generate ========== */
+  .tt-auto-generate {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 0.8rem; padding: 0.7rem 0.9rem;
+    background: rgba(255,255,255,0.6); border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.8);
+  }
+  .tt-auto-label { font-weight: 700; font-size: 0.85rem; color: #555; white-space: nowrap; }
+  .tt-auto-time {
+    font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.85rem;
+    width: 80px; padding: 0.35rem 0.4rem; border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.8);
+    outline: none; text-align: center;
+  }
+  .tt-auto-time:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+  .tt-auto-btn {
+    padding: 0.4rem 1rem; border-radius: 10px; border: 1.5px solid #3b82f6;
+    background: #3b82f6; color: #fff; font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .tt-auto-btn:hover { background: #2563eb; border-color: #2563eb; }
+
+  /* ========== Toggle Row Spacing ========== */
+  .toggle-row + .toggle-row { margin-top: 0.5rem; }
 </style>
 </head>
 <body>
@@ -800,13 +978,45 @@
 </div>
 
 <div class="right-panel" id="rightPanel">
-  <div class="rules-header-row">
-    <div class="rules-header">우리 반 약속</div>
-    <button class="edit-toggle-btn" id="editToggle" onclick="toggleEdit()">편집</button>
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="rules" onclick="switchTab('rules')">학급 약속</button>
+    <button class="tab-btn" data-tab="notebook" onclick="switchTab('notebook')">알림장</button>
+    <button class="tab-btn" data-tab="notice" onclick="switchTab('notice')">공지사항</button>
   </div>
-  <div class="rules-subtitle">CLASS RULES</div>
-  <div id="rulesContainer"></div>
-  <button class="add-rule-btn" id="addRuleBtn" onclick="addRule()">+ 새 규칙 추가</button>
+
+  <div class="tab-content" id="tabRules">
+    <div class="rules-header-row">
+      <div class="rules-header">우리 반 약속</div>
+      <button class="edit-toggle-btn" id="editToggle" onclick="toggleEdit()">편집</button>
+    </div>
+    <div class="rules-subtitle">CLASS RULES</div>
+    <div id="rulesContainer"></div>
+    <button class="add-rule-btn" id="addRuleBtn" onclick="addRule()">+ 새 규칙 추가</button>
+  </div>
+
+  <div class="tab-content" id="tabNotebook" style="display:none">
+    <div class="rules-header-row">
+      <div class="rules-header" style="color:#3b82f6;-webkit-text-fill-color:#3b82f6">알림장</div>
+    </div>
+    <div class="rules-subtitle">NOTEBOOK</div>
+    <div class="notebook-toolbar">
+      <span class="notebook-toolbar-label">글자 크기</span>
+      <button class="font-size-btn" onclick="changeNotebookFontSize(-2)">−</button>
+      <span class="font-size-display" id="fontSizeDisplay">18px</span>
+      <button class="font-size-btn" onclick="changeNotebookFontSize(2)">+</button>
+    </div>
+    <textarea id="notebookArea" class="notebook-textarea" placeholder="오늘의 알림을 입력하세요..." oninput="onNotebookInput()"></textarea>
+  </div>
+
+  <div class="tab-content" id="tabNotice" style="display:none">
+    <div class="rules-header-row">
+      <div class="rules-header" style="color:#8b5cf6;-webkit-text-fill-color:#8b5cf6">공지사항</div>
+      <button class="edit-toggle-btn" onclick="addNotice()">+ 추가</button>
+    </div>
+    <div class="rules-subtitle">NOTICE</div>
+    <div id="noticeContainer"></div>
+    <button class="add-notice-btn" onclick="addNotice()">+ 새 공지 추가</button>
+  </div>
 </div>
 
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
@@ -827,10 +1037,27 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
+      <div class="toggle-row">
+        <span class="toggle-label">수업 시작 알림음</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="chimeToggle" onchange="toggleChime()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">요일별 교시 수</div>
+      <div class="daily-periods-grid" id="dailyPeriodsGrid"></div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">시간표 편집</div>
+      <div class="tt-auto-generate">
+        <span class="tt-auto-label">시작 시간</span>
+        <input type="time" class="tt-auto-time" id="autoStartTime" value="09:00">
+        <button class="tt-auto-btn" onclick="generateTimetable()">자동 생성</button>
+      </div>
       <div class="tt-list" id="ttList"></div>
       <button class="tt-add-btn" onclick="addTimetableEntry()">+ 새 시간 추가</button>
       <div class="tt-bottom-row">
@@ -874,7 +1101,12 @@ const DEFAULT_TIMETABLE = [
 let rules = [];
 let isEditing = false;
 let timetable = [];
-let settings = { showRemaining: true };
+let settings = { showRemaining: true, chimeEnabled: true, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
+let viewData = { activeTab: 'rules', notebook: '', notices: [] };
+let lastPeriodLabel = null;
+let lastChimeTime = 0;
+let audioCtx = null;
+let notebookTimer = null;
 
 let drag = {
   active: false, cardEl: null, index: -1, currentIndex: -1,
@@ -927,6 +1159,14 @@ function loadSettings() {
   } catch { /* keep defaults */ }
 }
 function saveSettings() { localStorage.setItem('classroomSettings', JSON.stringify(settings)); }
+
+function loadViewData() {
+  try {
+    const s = localStorage.getItem('classroomViewData');
+    if (s) viewData = JSON.parse(s);
+  } catch { /* keep defaults */ }
+}
+function saveViewData() { localStorage.setItem('classroomViewData', JSON.stringify(viewData)); }
 
 // =============================================
 // RENDER RULES
@@ -1136,6 +1376,8 @@ function toggleShowRemaining() {
 function openSettings() {
   document.getElementById('settingsModal').classList.add('open');
   document.getElementById('showRemainingToggle').checked = settings.showRemaining;
+  document.getElementById('chimeToggle').checked = settings.chimeEnabled;
+  renderDailyPeriods();
   renderTimetableEditor();
 }
 
@@ -1368,6 +1610,248 @@ function onTtDragEnd() {
 }
 
 // =============================================
+// TAB SWITCHING
+// =============================================
+function switchTab(tabName) {
+  viewData.activeTab = tabName;
+  saveViewData();
+
+  if (isEditing) {
+    isEditing = false;
+    document.getElementById('editToggle').textContent = '편집';
+    document.getElementById('editToggle').classList.remove('active');
+    document.getElementById('rightPanel').classList.remove('edit-mode');
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+  document.getElementById('tabRules').style.display = tabName === 'rules' ? '' : 'none';
+  document.getElementById('tabNotebook').style.display = tabName === 'notebook' ? '' : 'none';
+  document.getElementById('tabNotice').style.display = tabName === 'notice' ? '' : 'none';
+
+  if (tabName === 'notebook') {
+    document.getElementById('notebookArea').value = viewData.notebook || '';
+    applyNotebookFontSize();
+  }
+  if (tabName === 'notice') {
+    renderNotices();
+  }
+}
+
+function initTabs() {
+  const tab = viewData.activeTab || 'rules';
+  switchTab(tab);
+}
+
+// =============================================
+// NOTEBOOK (알림장)
+// =============================================
+function onNotebookInput() {
+  clearTimeout(notebookTimer);
+  notebookTimer = setTimeout(() => {
+    viewData.notebook = document.getElementById('notebookArea').value;
+    saveViewData();
+  }, 500);
+}
+
+function changeNotebookFontSize(delta) {
+  const fontSize = (viewData.notebookFontSize || 18) + delta;
+  const clamped = Math.max(12, Math.min(40, fontSize));
+  viewData.notebookFontSize = clamped;
+  saveViewData();
+  applyNotebookFontSize();
+}
+
+function applyNotebookFontSize() {
+  const size = viewData.notebookFontSize || 18;
+  const area = document.getElementById('notebookArea');
+  if (area) area.style.fontSize = size + 'px';
+  const display = document.getElementById('fontSizeDisplay');
+  if (display) display.textContent = size + 'px';
+}
+
+// =============================================
+// NOTICES (공지사항)
+// =============================================
+function renderNotices() {
+  const container = document.getElementById('noticeContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  const notices = viewData.notices || [];
+
+  notices.forEach((notice, i) => {
+    const card = document.createElement('div');
+    card.className = 'notice-card';
+
+    const dot = document.createElement('div');
+    dot.className = 'notice-dot';
+
+    const content = document.createElement('div');
+    content.className = 'notice-content';
+    content.contentEditable = true;
+    content.spellcheck = false;
+    content.textContent = notice.text;
+    content.addEventListener('blur', () => {
+      viewData.notices[i].text = content.textContent.trim() || '새 공지';
+      saveViewData();
+    });
+    content.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); content.blur(); }
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'notice-delete-btn';
+    delBtn.innerHTML = '&#10005;';
+    delBtn.onclick = () => {
+      card.style.transition = 'transform 0.3s, opacity 0.3s';
+      card.style.transform = 'scale(0.8)';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        viewData.notices.splice(i, 1);
+        saveViewData();
+        renderNotices();
+        showToast('공지가 삭제되었어요');
+      }, 250);
+    };
+
+    card.appendChild(dot);
+    card.appendChild(content);
+    card.appendChild(delBtn);
+    container.appendChild(card);
+  });
+}
+
+function addNotice() {
+  viewData.notices.push({ text: '새 공지사항' });
+  saveViewData();
+  renderNotices();
+  showToast('새 공지가 추가되었어요');
+  setTimeout(() => {
+    const items = document.querySelectorAll('.notice-content');
+    const last = items[items.length - 1];
+    if (last) { last.focus(); document.execCommand('selectAll', false, null); }
+  }, 100);
+}
+
+// =============================================
+// AUTO-GENERATE TIMETABLE
+// =============================================
+function generateTimetable() {
+  if (!confirm('기존 시간표를 덮어쓰고 새로 생성할까요?')) return;
+
+  const startTimeStr = document.getElementById('autoStartTime').value || '09:00';
+  let startMins = timeToMins(startTimeStr);
+  const newTimetable = [];
+
+  for (let p = 1; p <= 7; p++) {
+    const endMins = startMins + 40;
+    newTimetable.push({
+      label: p + '교시',
+      start: minsToTime(startMins),
+      end: minsToTime(endMins),
+      type: 'in-class',
+      days: [1, 2, 3, 4, 5],
+    });
+
+    if (p === 4) {
+      // 점심시간 50분
+      newTimetable.push({
+        label: '점심시간',
+        start: minsToTime(endMins),
+        end: minsToTime(endMins + 50),
+        type: 'lunch-time',
+        days: [1, 2, 3, 4, 5],
+      });
+      startMins = endMins + 50;
+    } else {
+      startMins = endMins + 10; // 10분 쉬는시간 갭
+    }
+  }
+
+  timetable = newTimetable;
+  saveTimetable();
+  renderTimetableEditor();
+  showToast('시간표가 자동 생성되었어요');
+}
+
+// =============================================
+// CHIME (수업 시작 알림음)
+// =============================================
+function initAudio() {
+  const unlock = () => {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    document.removeEventListener('click', unlock);
+  };
+  document.addEventListener('click', unlock);
+}
+
+function playChime() {
+  if (!audioCtx || !settings.chimeEnabled) return;
+  const now = Date.now();
+  if (now - lastChimeTime < 60000) return;
+  lastChimeTime = now;
+
+  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+  notes.forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + i * 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.3 + 0.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + i * 0.3);
+    osc.stop(audioCtx.currentTime + i * 0.3 + 0.5);
+  });
+}
+
+function toggleChime() {
+  settings.chimeEnabled = document.getElementById('chimeToggle').checked;
+  saveSettings();
+}
+
+// =============================================
+// DAILY PERIODS SETTINGS
+// =============================================
+function renderDailyPeriods() {
+  const grid = document.getElementById('dailyPeriodsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const labels = ['월', '화', '수', '목', '금'];
+
+  labels.forEach((label, di) => {
+    const dayNum = di + 1;
+    const item = document.createElement('div');
+    item.className = 'daily-period-item';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'daily-period-label';
+    lbl.textContent = label;
+
+    const sel = document.createElement('select');
+    sel.className = 'daily-period-select';
+    for (let n = 4; n <= 7; n++) {
+      const opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = n + '교시';
+      if (settings.dailyPeriods[dayNum] === n) opt.selected = true;
+      sel.appendChild(opt);
+    }
+    sel.addEventListener('change', () => {
+      settings.dailyPeriods[dayNum] = parseInt(sel.value);
+      saveSettings();
+    });
+
+    item.appendChild(lbl);
+    item.appendChild(sel);
+    grid.appendChild(item);
+  });
+}
+
+// =============================================
 // CLOCK & PERIOD DETECTION
 // =============================================
 function getCurrentPeriod(now) {
@@ -1378,9 +1862,32 @@ function getCurrentPeriod(now) {
   if (isWeekend) return { label: '주말', type: 'off-time', endMins: null };
 
   // Filter & sort today's entries
-  const todayEntries = timetable
+  let todayEntries = timetable
     .filter(e => e.days.includes(day))
     .sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+
+  // Filter by daily periods setting
+  const maxPeriods = settings.dailyPeriods ? settings.dailyPeriods[day] : null;
+  if (maxPeriods) {
+    let periodCount = 0;
+    let lastPeriodEndMins = 0;
+    const filtered = [];
+    for (const e of todayEntries) {
+      if (/^\d+교시$/.test(e.label)) {
+        periodCount++;
+        if (periodCount <= maxPeriods) {
+          filtered.push(e);
+          lastPeriodEndMins = timeToMins(e.end);
+        }
+      } else {
+        filtered.push(e);
+      }
+    }
+    todayEntries = filtered.filter(e => {
+      if (/^\d+교시$/.test(e.label)) return true;
+      return timeToMins(e.start) < lastPeriodEndMins;
+    });
+  }
 
   if (todayEntries.length === 0) return { label: '수업 없음', type: 'off-time', endMins: null };
 
@@ -1431,6 +1938,12 @@ function updateClock() {
   const alertEl = document.getElementById('periodAlert');
   alertEl.className = 'period-alert ' + period.type;
 
+  // Chime on period transition (수업 시작 시)
+  if (lastPeriodLabel !== null && lastPeriodLabel !== period.label && period.type === 'in-class') {
+    playChime();
+  }
+  lastPeriodLabel = period.label;
+
   if (settings.showRemaining && period.endMins !== null) {
     const currentTotalSecs = n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
     const endTotalSecs = period.endMins * 60;
@@ -1460,7 +1973,10 @@ function updateClock() {
 loadSettings();
 loadTimetable();
 loadRules();
+loadViewData();
 renderRules();
+initTabs();
+initAudio();
 updateClock();
 setInterval(updateClock, 1000);
 </script>

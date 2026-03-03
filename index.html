@@ -2541,46 +2541,20 @@ function fetchExternalCounter(increment) {
   var key = 'total-visits';
   var todayKey = 'today-' + new Date().toISOString().slice(0, 10);
 
-  if (increment) {
-    // Increment total
-    fetch('https://api.counterapi.dev/v1/' + namespace + '/' + key + '/up')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.count !== undefined) {
-          document.getElementById('totalCount').textContent = data.count;
-        }
-      })
-      .catch(function() { /* use local fallback */ });
+  var totalUrl = 'https://api.counterapi.dev/v1/' + namespace + '/' + key;
+  var todayUrl = 'https://api.counterapi.dev/v1/' + namespace + '/' + todayKey;
+  if (increment) { totalUrl += '/up'; todayUrl += '/up'; }
 
-    // Increment daily
-    fetch('https://api.counterapi.dev/v1/' + namespace + '/' + todayKey + '/up')
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.count !== undefined) {
-          document.getElementById('todayCount').textContent = data.count;
-        }
-      })
-      .catch(function() { /* use local fallback */ });
-  } else {
-    // Just fetch current counts without incrementing
-    fetch('https://api.counterapi.dev/v1/' + namespace + '/' + key)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.count !== undefined) {
-          document.getElementById('totalCount').textContent = data.count;
-        }
-      })
-      .catch(function() { /* use local fallback */ });
-
-    fetch('https://api.counterapi.dev/v1/' + namespace + '/' + todayKey)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.count !== undefined) {
-          document.getElementById('todayCount').textContent = data.count;
-        }
-      })
-      .catch(function() { /* use local fallback */ });
-  }
+  Promise.all([
+    fetch(totalUrl).then(function(r) { return r.json(); }).catch(function() { return null; }),
+    fetch(todayUrl).then(function(r) { return r.json(); }).catch(function() { return null; })
+  ]).then(function(results) {
+    var total = results[0] && results[0].count !== undefined ? results[0].count : 0;
+    var today = results[1] && results[1].count !== undefined ? results[1].count : 0;
+    if (total < today) total = today;
+    if (total) document.getElementById('totalCount').textContent = total;
+    if (today) document.getElementById('todayCount').textContent = today;
+  });
 }
 
 function updateCounterDisplay(today, total) {

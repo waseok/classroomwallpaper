@@ -2918,6 +2918,16 @@ function fetchExternalCounter(increment) {
     if (total < today) total = today;
     if (total) document.getElementById('totalCount').textContent = total;
     if (today) document.getElementById('todayCount').textContent = today;
+
+    // Save API values back to localStorage so refresh shows correct counts
+    if (total || today) {
+      try {
+        var counterData = JSON.parse(localStorage.getItem('classroomVisitorCounter') || '{}');
+        if (total) counterData.totalCount = Math.max(counterData.totalCount || 0, total);
+        if (today) counterData.todayCount = Math.max(counterData.todayCount || 0, today);
+        localStorage.setItem('classroomVisitorCounter', JSON.stringify(counterData));
+      } catch(e) {}
+    }
   });
 }
 

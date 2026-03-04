@@ -187,6 +187,173 @@
     z-index: -1;
   }
 
+  /* ========== Timetable Mode Transitions ========== */
+  .left-panel, .left-panel .date-row, .left-panel .date-display,
+  .left-panel .day-name, .left-panel .ampm-display, .left-panel .time-display,
+  .left-panel .seconds-display, .left-panel .clock-container,
+  .left-panel .period-alert { transition: all 0.4s ease; }
+
+  .left-panel.timetable-mode {
+    justify-content: flex-start;
+    padding-top: 2.5rem;
+  }
+  .left-panel.timetable-mode .date-row {
+    position: relative;
+    top: auto;
+    flex-direction: row;
+    gap: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  .left-panel.timetable-mode .date-display { font-size: 1.8rem; }
+  .left-panel.timetable-mode .day-name { font-size: 1.5rem; }
+  .left-panel.timetable-mode .ampm-display { font-size: 2.5rem; }
+  .left-panel.timetable-mode .time-display { font-size: 4rem; }
+  .left-panel.timetable-mode .seconds-display { font-size: 1.5rem; }
+  .left-panel.timetable-mode .clock-container { gap: 1rem; }
+  .left-panel.timetable-mode .period-alert {
+    position: relative;
+    bottom: auto;
+    margin-top: auto;
+    font-size: 2rem;
+  }
+
+  /* ========== Timetable Display List ========== */
+  .timetable-display {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.4s ease, max-height 0.4s ease;
+    width: 100%;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .left-panel.timetable-mode .timetable-display {
+    opacity: 1;
+    max-height: 600px;
+    margin-top: 1rem;
+  }
+  .tt-display-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+  }
+  .tt-display-row .tt-display-label {
+    min-width: 4.5em;
+    text-align: left;
+  }
+  .tt-display-row .tt-display-subject {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 600;
+    font-size: 1.35rem;
+    opacity: 0.7;
+  }
+  .tt-display-row.tt-past {
+    opacity: 0.35;
+    text-decoration: line-through;
+  }
+  .tt-display-row.tt-current {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    border: 1.5px solid rgba(59, 130, 246, 0.25);
+  }
+  .tt-display-row.tt-current::before {
+    content: '\25B6';
+    font-size: 0.9rem;
+    margin-right: -0.3rem;
+  }
+  .tt-display-row.tt-current.lunch-time {
+    background: rgba(249, 115, 22, 0.12);
+    color: #f97316;
+    border-color: rgba(249, 115, 22, 0.25);
+  }
+  .tt-display-row.tt-future {
+    opacity: 0.7;
+    color: #555;
+  }
+  .timetable-empty-msg {
+    text-align: center;
+    color: rgba(0,0,0,0.35);
+    font-size: 1rem;
+    padding: 1.5rem 0;
+  }
+
+  /* ========== Subject Grid Editor ========== */
+  .subject-grid {
+    display: grid;
+    grid-template-columns: auto repeat(5, 1fr);
+    gap: 6px;
+    padding: 0.5rem 0;
+  }
+  .subject-grid-header {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #555;
+    padding: 4px 0;
+  }
+  .subject-grid-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    padding-right: 6px;
+  }
+  .subject-grid-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    text-align: center;
+    background: #fff;
+    transition: border-color 0.2s;
+  }
+  .subject-grid-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+  }
+
+  /* ========== Timetable Quick Toggle Button ========== */
+  .timetable-toggle-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: rgba(0,0,0,0.35);
+    transition: all 0.3s;
+    z-index: 5;
+  }
+  .timetable-toggle-btn:hover {
+    background: rgba(255,255,255,0.8);
+    color: rgba(0,0,0,0.6);
+  }
+  .timetable-toggle-btn.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
   .divider {
     position: fixed;
     left: 50%; top: 10%;
@@ -1239,8 +1406,9 @@
 <div class="particle"></div><div class="particle"></div>
 <div class="divider"></div>
 
-<div class="left-panel">
+<div class="left-panel" id="leftPanel">
   <div class="clock-glow"></div>
+  <button class="timetable-toggle-btn" id="timetableToggleBtn" onclick="toggleTimetableMode()" title="시간표 보기">&#128197;</button>
   <div class="date-row">
     <div class="date-display" id="dateDisplay"></div>
     <div class="day-name" id="dayName"></div>
@@ -1250,6 +1418,7 @@
     <div class="time-display" id="timeDisplay">12<span class="colon">:</span>00</div>
   </div>
   <div class="seconds-display" id="secondsDisplay">: 00</div>
+  <div class="timetable-display" id="timetableDisplay"></div>
   <div class="period-alert off-time" id="periodAlert">수업 전</div>
 </div>
 
@@ -1332,6 +1501,13 @@
           <span class="toggle-slider"></span>
         </label>
       </div>
+      <div class="toggle-row">
+        <span class="toggle-label">시간표 표시</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="timetableModeToggle" onchange="toggleTimetableModeSetting()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
     <div class="settings-section">
@@ -1351,6 +1527,11 @@
       <div class="tt-bottom-row">
         <button class="tt-reset-btn" onclick="resetTimetable()">기본값으로 초기화</button>
       </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">과목 편집</div>
+      <div class="subject-grid" id="subjectGrid"></div>
     </div>
 
     <div class="settings-section">
@@ -1474,13 +1655,13 @@ const DEFAULT_RULES = [
 ];
 
 const DEFAULT_TIMETABLE = [
-  { label: '1교시', start: '09:00', end: '09:40', type: 'in-class', days: [1,2,3,4,5] },
-  { label: '2교시', start: '09:50', end: '10:30', type: 'in-class', days: [1,2,3,4,5] },
-  { label: '3교시', start: '10:40', end: '11:20', type: 'in-class', days: [1,2,3,4,5] },
-  { label: '4교시', start: '11:30', end: '12:10', type: 'in-class', days: [1,2,3,4,5] },
-  { label: '점심시간', start: '12:10', end: '13:00', type: 'lunch-time', days: [1,2,3,4,5] },
-  { label: '5교시', start: '13:00', end: '13:40', type: 'in-class', days: [1,2,3,4,5] },
-  { label: '6교시', start: '13:50', end: '14:30', type: 'in-class', days: [2] },
+  { label: '1교시', start: '09:00', end: '09:40', type: 'in-class', days: [1,2,3,4,5], subjects: {} },
+  { label: '2교시', start: '09:50', end: '10:30', type: 'in-class', days: [1,2,3,4,5], subjects: {} },
+  { label: '3교시', start: '10:40', end: '11:20', type: 'in-class', days: [1,2,3,4,5], subjects: {} },
+  { label: '4교시', start: '11:30', end: '12:10', type: 'in-class', days: [1,2,3,4,5], subjects: {} },
+  { label: '점심시간', start: '12:10', end: '13:00', type: 'lunch-time', days: [1,2,3,4,5], subjects: {} },
+  { label: '5교시', start: '13:00', end: '13:40', type: 'in-class', days: [1,2,3,4,5], subjects: {} },
+  { label: '6교시', start: '13:50', end: '14:30', type: 'in-class', days: [2], subjects: {} },
 ];
 
 // =============================================
@@ -1489,7 +1670,7 @@ const DEFAULT_TIMETABLE = [
 let rules = [];
 let isEditing = false;
 let timetable = [];
-let settings = { showRemaining: true, chimeEnabled: true, colonBlink: true, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
+let settings = { showRemaining: true, chimeEnabled: true, colonBlink: true, timetableMode: false, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
 let viewData = { activeTab: 'rules', notebook: '', notices: [] };
 let lastPeriodLabel = null;
 let lastChimeTime = 0;
@@ -1534,6 +1715,7 @@ function loadTimetable() {
     const s = localStorage.getItem('classroomTimetable');
     timetable = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_TIMETABLE));
   } catch { timetable = JSON.parse(JSON.stringify(DEFAULT_TIMETABLE)); }
+  timetable.forEach(entry => { if (!entry.subjects) entry.subjects = {}; });
 }
 function saveTimetable() {
   timetable.sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
@@ -1549,6 +1731,7 @@ function loadSettings() {
       if (!settings.dailyPeriods) settings.dailyPeriods = { 1:5, 2:6, 3:5, 4:5, 5:5 };
       if (settings.chimeEnabled === undefined) settings.chimeEnabled = true;
       if (settings.colonBlink === undefined) settings.colonBlink = true;
+      if (settings.timetableMode === undefined) settings.timetableMode = false;
     }
   } catch { /* keep defaults */ }
 }
@@ -1772,8 +1955,10 @@ function openSettings() {
   document.getElementById('showRemainingToggle').checked = settings.showRemaining;
   document.getElementById('chimeToggle').checked = settings.chimeEnabled;
   document.getElementById('colonBlinkToggle').checked = settings.colonBlink;
+  document.getElementById('timetableModeToggle').checked = settings.timetableMode;
   renderDailyPeriods();
   renderTimetableEditor();
+  renderSubjectGrid();
 }
 
 function closeSettings() {
@@ -1920,6 +2105,7 @@ function addTimetableEntry() {
     end: minsToTime(endMins),
     type: 'in-class',
     days: [1, 2, 3, 4, 5],
+    subjects: {},
   });
   saveTimetable();
   renderTimetableEditor();
@@ -1931,7 +2117,50 @@ function resetTimetable() {
   timetable = JSON.parse(JSON.stringify(DEFAULT_TIMETABLE));
   saveTimetable();
   renderTimetableEditor();
+  renderSubjectGrid();
   showToast('시간표가 초기화되었어요');
+}
+
+function renderSubjectGrid() {
+  const grid = document.getElementById('subjectGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const dayLabels = ['월', '화', '수', '목', '금'];
+  const inClassEntries = timetable.filter(e => e.type === 'in-class');
+
+  // Header row: empty corner + day headers
+  const corner = document.createElement('div');
+  grid.appendChild(corner);
+  dayLabels.forEach(label => {
+    const hdr = document.createElement('div');
+    hdr.className = 'subject-grid-header';
+    hdr.textContent = label;
+    grid.appendChild(hdr);
+  });
+
+  // Each period row
+  inClassEntries.forEach((entry, _) => {
+    const idx = timetable.indexOf(entry);
+    const lbl = document.createElement('div');
+    lbl.className = 'subject-grid-label';
+    lbl.textContent = entry.label;
+    grid.appendChild(lbl);
+
+    for (let d = 1; d <= 5; d++) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'subject-grid-input';
+      input.value = entry.subjects[d] || '';
+      input.placeholder = '-';
+      input.addEventListener('input', () => {
+        timetable[idx].subjects[d] = input.value;
+        saveTimetable();
+        if (settings.timetableMode) renderTimetableDisplay();
+      });
+      grid.appendChild(input);
+    }
+  });
 }
 
 // =============================================
@@ -2170,6 +2399,7 @@ function generateTimetable() {
       end: minsToTime(endMins),
       type: 'in-class',
       days: [1, 2, 3, 4, 5],
+      subjects: {},
     });
 
     if (p === 4) {
@@ -2180,6 +2410,7 @@ function generateTimetable() {
         end: minsToTime(endMins + 50),
         type: 'lunch-time',
         days: [1, 2, 3, 4, 5],
+        subjects: {},
       });
       startMins = endMins + 50;
     } else {
@@ -2244,6 +2475,86 @@ function applyColonBlink() {
 }
 
 // =============================================
+// TIMETABLE MODE (LEFT PANEL DISPLAY)
+// =============================================
+function toggleTimetableMode() {
+  settings.timetableMode = !settings.timetableMode;
+  saveSettings();
+  applyTimetableMode();
+}
+
+function toggleTimetableModeSetting() {
+  settings.timetableMode = document.getElementById('timetableModeToggle').checked;
+  saveSettings();
+  applyTimetableMode();
+}
+
+function applyTimetableMode() {
+  const panel = document.getElementById('leftPanel');
+  const btn = document.getElementById('timetableToggleBtn');
+  const toggle = document.getElementById('timetableModeToggle');
+
+  panel.classList.toggle('timetable-mode', settings.timetableMode);
+  btn.classList.toggle('active', settings.timetableMode);
+  if (toggle) toggle.checked = settings.timetableMode;
+
+  if (settings.timetableMode) {
+    renderTimetableDisplay();
+  }
+}
+
+function renderTimetableDisplay() {
+  const container = document.getElementById('timetableDisplay');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const now = new Date();
+  const day = now.getDay();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const isWeekend = (day === 0 || day === 6);
+
+  if (isWeekend) {
+    container.innerHTML = '<div class="timetable-empty-msg">주말에는 수업이 없어요</div>';
+    return;
+  }
+
+  const entries = getTodayEntries(now);
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="timetable-empty-msg">오늘은 수업이 없어요</div>';
+    return;
+  }
+
+  entries.forEach(entry => {
+    const start = timeToMins(entry.start);
+    const end = timeToMins(entry.end);
+
+    const row = document.createElement('div');
+    row.className = 'tt-display-row';
+
+    if (mins >= end) {
+      row.classList.add('tt-past');
+    } else if (mins >= start && mins < end) {
+      row.classList.add('tt-current');
+      if (entry.type === 'lunch-time') row.classList.add('lunch-time');
+    } else {
+      row.classList.add('tt-future');
+    }
+
+    const label = document.createElement('span');
+    label.className = 'tt-display-label';
+    label.textContent = entry.label;
+
+    const subjectSpan = document.createElement('span');
+    subjectSpan.className = 'tt-display-subject';
+    subjectSpan.textContent = entry.subjects[day] || '';
+
+    row.appendChild(label);
+    row.appendChild(subjectSpan);
+    container.appendChild(row);
+  });
+}
+
+// =============================================
 // DAILY PERIODS SETTINGS
 // =============================================
 function renderDailyPeriods() {
@@ -2284,19 +2595,15 @@ function renderDailyPeriods() {
 // =============================================
 // CLOCK & PERIOD DETECTION
 // =============================================
-function getCurrentPeriod(now) {
+function getTodayEntries(now) {
   const day = now.getDay();
-  const mins = now.getHours() * 60 + now.getMinutes();
   const isWeekend = (day === 0 || day === 6);
+  if (isWeekend) return [];
 
-  if (isWeekend) return { label: '주말', type: 'off-time', endMins: null };
-
-  // Filter & sort today's entries
   let todayEntries = timetable
     .filter(e => e.days.includes(day))
     .sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
 
-  // Filter by daily periods setting
   const maxPeriods = settings.dailyPeriods ? settings.dailyPeriods[day] : null;
   if (maxPeriods) {
     let periodCount = 0;
@@ -2318,6 +2625,18 @@ function getCurrentPeriod(now) {
       return timeToMins(e.start) < lastPeriodEndMins;
     });
   }
+
+  return todayEntries;
+}
+
+function getCurrentPeriod(now) {
+  const day = now.getDay();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const isWeekend = (day === 0 || day === 6);
+
+  if (isWeekend) return { label: '주말', type: 'off-time', endMins: null };
+
+  const todayEntries = getTodayEntries(now);
 
   if (todayEntries.length === 0) return { label: '수업 없음', type: 'off-time', endMins: null };
 
@@ -2399,6 +2718,11 @@ function updateClock() {
     }
   } else {
     alertEl.textContent = period.label;
+  }
+
+  // Update timetable display if in timetable mode
+  if (settings.timetableMode) {
+    renderTimetableDisplay();
   }
 }
 
@@ -2578,6 +2902,7 @@ loadViewData();
 renderRules();
 initTabs();
 initAudio();
+applyTimetableMode();
 updateClock();
 setInterval(updateClock, 1000);
 initVisitorCounter();

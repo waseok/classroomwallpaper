@@ -2872,12 +2872,13 @@ function initVisitorCounter() {
       counterData.todayCount = counterData.todayVisitors.length;
     }
 
-    // Track unique total visitors
+    // Track unique total visitors (preserve old count during migration)
+    var oldTotal = counterData.totalCount || 0;
     if (!counterData.allVisitors) counterData.allVisitors = [];
     if (!counterData.allVisitors.includes(visitorId)) {
       counterData.allVisitors.push(visitorId);
     }
-    counterData.totalCount = counterData.allVisitors.length;
+    counterData.totalCount = Math.max(oldTotal, counterData.allVisitors.length);
 
     localStorage.setItem('classroomVisitorCounter', JSON.stringify(counterData));
   } else {

@@ -1174,10 +1174,10 @@
   /* ========== Notice Cards ========== */
   .notice-card {
     display: flex;
-    align-items: flex-start;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 1rem;
-    padding: 1.2rem 1.5rem;
+    padding: 0.6rem 0.8rem;
     border-radius: 18px;
     background: rgba(255,255,255,0.6);
     border: 1px solid rgba(255,255,255,0.8);
@@ -1188,7 +1188,7 @@
   .notice-card:hover { background: rgba(255,255,255,0.85); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
   .notice-dot {
     width: 10px; height: 10px; border-radius: 50%;
-    background: #8b5cf6; margin-top: 0.9rem; flex-shrink: 0;
+    background: #8b5cf6; flex-shrink: 0;
   }
   .notice-content {
     flex: 1; min-width: 0; outline: none;
@@ -1467,7 +1467,7 @@
 
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
 <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="전체화면">&#x26F6;</button>
-<button class="version-label" onclick="openChangelog()">v1.1.0</button>
+<button class="version-label" onclick="openChangelog()">v1.1.1</button>
 
 <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
 
@@ -1551,6 +1551,12 @@
       <button class="modal-close" onclick="closeChangelog()">&#10005;</button>
     </div>
     <div class="changelog-list">
+      <div class="changelog-item">
+        <div class="changelog-item-header">
+          <span class="changelog-version">v1.1.1</span>
+        </div>
+        <div class="changelog-desc">공지사항 카드 여백 축소, 글자 크기 증가, dot 중앙 정렬</div>
+      </div>
       <div class="changelog-item">
         <div class="changelog-item-header">
           <span class="changelog-version">v1.1.0</span>

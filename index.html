@@ -195,7 +195,7 @@
 
   .left-panel.timetable-mode {
     justify-content: flex-start;
-    padding-top: 2.5rem;
+    padding-top: 3rem;
   }
   .left-panel.timetable-mode .date-row {
     position: relative;
@@ -204,12 +204,12 @@
     gap: 1rem;
     margin-bottom: 0.3rem;
   }
-  .left-panel.timetable-mode .date-display { font-size: 1.8rem; }
-  .left-panel.timetable-mode .day-name { font-size: 1.5rem; }
-  .left-panel.timetable-mode .ampm-display { font-size: 2.5rem; }
-  .left-panel.timetable-mode .time-display { font-size: 4rem; }
-  .left-panel.timetable-mode .seconds-display { font-size: 1.5rem; }
-  .left-panel.timetable-mode .clock-container { gap: 1rem; }
+  .left-panel.timetable-mode .date-display { font-size: 2.8rem; }
+  .left-panel.timetable-mode .day-name { font-size: 2.3rem; }
+  .left-panel.timetable-mode .ampm-display { font-size: 4.2rem; }
+  .left-panel.timetable-mode .time-display { font-size: 7rem; }
+  .left-panel.timetable-mode .seconds-display { font-size: 2.5rem; }
+  .left-panel.timetable-mode .clock-container { gap: 1.8rem; }
   .left-panel.timetable-mode .period-alert {
     position: relative;
     bottom: auto;
@@ -227,11 +227,12 @@
     padding: 0 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
   .left-panel.timetable-mode .timetable-display {
     opacity: 1;
-    max-height: 600px;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
     margin-top: 1rem;
   }
   .tt-display-row {
@@ -1467,7 +1468,7 @@
 
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
 <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="전체화면">&#x26F6;</button>
-<button class="version-label" onclick="openChangelog()">v1.1.1</button>
+<button class="version-label" onclick="openChangelog()">v1.2.0</button>
 
 <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
 
@@ -1551,6 +1552,12 @@
       <button class="modal-close" onclick="closeChangelog()">&#10005;</button>
     </div>
     <div class="changelog-list">
+      <div class="changelog-item">
+        <div class="changelog-item-header">
+          <span class="changelog-version">v1.2.0</span>
+        </div>
+        <div class="changelog-desc">시간표 모드 디자인 개선: 시계 크기 확대, 교시 수 따라 행 크기 자동 조절, 교시 알림에 과목명 표시, 시간표 높이 동적 계산</div>
+      </div>
       <div class="changelog-item">
         <div class="changelog-item-header">
           <span class="changelog-version">v1.1.1</span>
@@ -2536,12 +2543,25 @@ function renderTimetableDisplay() {
     return;
   }
 
+  // 교시 수에 따라 행 크기 자동 조절
+  let rowFontSize = '2rem';
+  let rowPadding = '0.85rem 1rem';
+  if (entries.length >= 9) {
+    rowFontSize = '1.5rem';
+    rowPadding = '0.5rem 1rem';
+  } else if (entries.length >= 7) {
+    rowFontSize = '1.75rem';
+    rowPadding = '0.65rem 1rem';
+  }
+
   entries.forEach(entry => {
     const start = timeToMins(entry.start);
     const end = timeToMins(entry.end);
 
     const row = document.createElement('div');
     row.className = 'tt-display-row';
+    row.style.fontSize = rowFontSize;
+    row.style.padding = rowPadding;
 
     if (mins >= end) {
       row.classList.add('tt-past');
@@ -2659,7 +2679,8 @@ function getCurrentPeriod(now) {
 
     // Currently in this period
     if (mins >= start && mins < end) {
-      return { label: entry.label, type: entry.type, endMins: end };
+      const subject = entry.subjects ? (entry.subjects[day] || '') : '';
+      return { label: entry.label, type: entry.type, endMins: end, subject: subject };
     }
 
     // Check gap to next entry (break time)
@@ -2705,6 +2726,9 @@ function updateClock() {
   }
   lastPeriodLabel = period.label;
 
+  // 과목명이 있으면 "3교시 · 수학" 형태로 표시
+  const displayLabel = period.subject ? period.label + ' · ' + period.subject : period.label;
+
   if (settings.showRemaining && period.endMins !== null) {
     const currentTotalSecs = n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
     const endTotalSecs = period.endMins * 60;
@@ -2720,16 +2744,16 @@ function updateClock() {
         remText = remSec + '초';
       }
       alertEl.textContent = '';
-      alertEl.appendChild(document.createTextNode(period.label + ' '));
+      alertEl.appendChild(document.createTextNode(displayLabel + ' '));
       const remSpan = document.createElement('span');
       remSpan.className = 'remaining-time';
       remSpan.textContent = '(' + remText + ' 남음)';
       alertEl.appendChild(remSpan);
     } else {
-      alertEl.textContent = period.label;
+      alertEl.textContent = displayLabel;
     }
   } else {
-    alertEl.textContent = period.label;
+    alertEl.textContent = displayLabel;
   }
 
   // Update timetable display if in timetable mode

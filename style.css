@@ -1464,6 +1464,22 @@
   .event-schedule-actions {
     display: flex;
     gap: 0.5rem;
+    align-items: center;
+  }
+
+  .event-save-status {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: rgba(0,0,0,0.45);
+    white-space: nowrap;
+  }
+
+  .event-save-status.dirty {
+    color: #f97316;
+  }
+
+  .event-save-status.saved {
+    color: #10b981;
   }
 
   .event-add-btn {

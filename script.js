@@ -35,6 +35,7 @@ let lastChimeTime = 0;
 let audioCtx = null;
 let notebookTimer = null;
 let lastAcademicEventToastKey = '';
+let specialTimetableDirty = false;
 
 let drag = {
   active: false, cardEl: null, index: -1, currentIndex: -1,
@@ -445,6 +446,7 @@ function fillAcademicEventForm() {
 
 function clearAcademicEventForm() {
   viewData.selectedAcademicEventDate = '';
+  specialTimetableDirty = false;
   saveViewData();
   fillAcademicEventForm();
   renderAcademicEventList();
@@ -577,6 +579,7 @@ function deleteAcademicEvent(dateKey) {
   if (!confirm('이 학사 일정을 삭제할까요?')) return;
   viewData.academicEvents = getAcademicEvents().filter(event => event.date !== dateKey);
   if (viewData.selectedAcademicEventDate === dateKey) viewData.selectedAcademicEventDate = '';
+  specialTimetableDirty = false;
   saveViewData();
   fillAcademicEventForm();
   renderAcademicEventList();
@@ -590,18 +593,27 @@ function renderSpecialTimetableEditor() {
   const card = document.getElementById('eventScheduleCard');
   const titleEl = document.getElementById('eventScheduleTitle');
   const container = document.getElementById('specialTtList');
+  const statusEl = document.getElementById('specialTtSaveStatus');
   if (!card || !titleEl || !container) return;
 
   const selected = getSelectedAcademicEvent();
   if (!selected) {
     card.style.display = '';
     titleEl.textContent = '날짜별 시간표';
+    if (statusEl) {
+      statusEl.textContent = '일정을 먼저 선택하세요';
+      statusEl.className = 'event-save-status';
+    }
     container.innerHTML = '<div class="event-schedule-placeholder">일정을 저장하거나 목록에서 편집을 누르면<br>이 아래에서 해당 날짜 전용 시간표를 수정할 수 있습니다.</div>';
     return;
   }
 
   card.style.display = '';
   titleEl.textContent = selected.date + ' 날짜 전용 시간표';
+  if (statusEl) {
+    statusEl.textContent = specialTimetableDirty ? '변경됨' : '저장됨';
+    statusEl.className = 'event-save-status ' + (specialTimetableDirty ? 'dirty' : 'saved');
+  }
   container.innerHTML = '';
 
   if (!selected.timetable.length) {
@@ -622,7 +634,7 @@ function renderSpecialTimetableEditor() {
     labelInput.value = entry.label;
     labelInput.addEventListener('change', () => {
       entry.label = labelInput.value.trim() || '새 시간';
-      saveAcademicEventTimetable();
+      markSpecialTimetableDirty();
     });
 
     const startInput = document.createElement('input');
@@ -632,7 +644,7 @@ function renderSpecialTimetableEditor() {
     startInput.addEventListener('change', () => {
       if (!startInput.value) return;
       entry.start = startInput.value;
-      saveAcademicEventTimetable(true);
+      markSpecialTimetableDirty(true);
     });
 
     const sep = document.createElement('span');
@@ -646,7 +658,7 @@ function renderSpecialTimetableEditor() {
     endInput.addEventListener('change', () => {
       if (!endInput.value) return;
       entry.end = endInput.value;
-      saveAcademicEventTimetable(true);
+      markSpecialTimetableDirty(true);
     });
 
     const typeSelect = document.createElement('select');
@@ -660,7 +672,7 @@ function renderSpecialTimetableEditor() {
     });
     typeSelect.addEventListener('change', () => {
       entry.type = typeSelect.value;
-      saveAcademicEventTimetable();
+      markSpecialTimetableDirty();
     });
 
     const subjectInput = document.createElement('input');
@@ -670,7 +682,7 @@ function renderSpecialTimetableEditor() {
     subjectInput.value = entry.subject || '';
     subjectInput.addEventListener('input', () => {
       entry.subject = subjectInput.value;
-      saveAcademicEventTimetable();
+      markSpecialTimetableDirty();
     });
 
     const delBtn = document.createElement('button');
@@ -678,7 +690,7 @@ function renderSpecialTimetableEditor() {
     delBtn.innerHTML = '&#10005;';
     delBtn.addEventListener('click', () => {
       selected.timetable.splice(i, 1);
-      saveAcademicEventTimetable(true);
+      markSpecialTimetableDirty(true);
       showToast('날짜별 시간이 삭제되었어요');
     });
 
@@ -693,14 +705,35 @@ function renderSpecialTimetableEditor() {
   });
 }
 
-function saveAcademicEventTimetable(shouldRerender) {
+function markSpecialTimetableDirty(shouldRerender) {
+  specialTimetableDirty = true;
+  if (shouldRerender) renderSpecialTimetableEditor();
+  else {
+    const statusEl = document.getElementById('specialTtSaveStatus');
+    if (statusEl) {
+      statusEl.textContent = '변경됨';
+      statusEl.className = 'event-save-status dirty';
+    }
+  }
+}
+
+function saveAcademicEventTimetable(shouldRerender, showSavedToast) {
   const selected = getSelectedAcademicEvent();
   if (!selected) return;
   selected.timetable = selected.timetable.map(cloneEntry).sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+  specialTimetableDirty = false;
   saveViewData();
   if (shouldRerender) renderSpecialTimetableEditor();
+  else {
+    const statusEl = document.getElementById('specialTtSaveStatus');
+    if (statusEl) {
+      statusEl.textContent = '저장됨';
+      statusEl.className = 'event-save-status saved';
+    }
+  }
   updateAcademicEventBanner(new Date());
   if (settings.timetableMode) renderTimetableDisplay();
+  if (showSavedToast) showToast('날짜별 시간표가 저장되었어요');
 }
 
 function addSpecialTimetableEntry() {
@@ -721,7 +754,8 @@ function addSpecialTimetableEntry() {
     subjects: {},
     days: [],
   });
-  saveAcademicEventTimetable(true);
+  specialTimetableDirty = true;
+  saveAcademicEventTimetable(true, false);
   showToast('날짜별 시간이 추가되었어요');
 }
 
@@ -732,7 +766,8 @@ function copyDefaultTimetableToSelectedEvent() {
     return;
   }
   selected.timetable = buildSpecialTimetableFromBase(selected.date);
-  saveAcademicEventTimetable(true);
+  specialTimetableDirty = true;
+  saveAcademicEventTimetable(true, false);
   showToast('기본 시간표를 날짜별 시간표로 불러왔어요');
 }
 

@@ -162,6 +162,8 @@
         <div class="event-schedule-header">
           <div class="event-schedule-title" id="eventScheduleTitle">날짜별 시간표</div>
           <div class="event-schedule-actions">
+            <span class="event-save-status" id="specialTtSaveStatus">저장됨</span>
+            <button class="tt-auto-btn" onclick="saveAcademicEventTimetable(true, true)">시간표 저장</button>
             <button class="tt-reset-btn" onclick="copyDefaultTimetableToSelectedEvent()">기본 시간표 불러오기</button>
             <button class="tt-add-btn event-add-btn" onclick="addSpecialTimetableEntry()">+ 새 시간 추가</button>
           </div>

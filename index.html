@@ -146,7 +146,8 @@
 
     <div class="settings-section">
       <div class="settings-section-title">학사 일정 / 날짜별 시간표</div>
-      <div class="event-help-text">배너 알림은 해당 날짜 당일에만 왼쪽 패널에 표시됩니다. 저장한 뒤 아래에서 날짜 전용 시간표를 바로 수정할 수 있습니다.</div>
+      <div class="event-selected-bar" id="eventSelectedBar">현재 선택: 새 일정 작성 중</div>
+      <div class="event-help-text">1. 날짜와 일정 입력 2. 일정 저장 3. 아래 날짜 전용 시간표 수정. 배너는 해당 날짜 당일에만 표시됩니다.</div>
       <div class="event-form-grid">
         <input type="date" class="event-input" id="eventDateInput">
         <input type="text" class="event-input" id="eventTitleInput" placeholder="예: 체험학습, 단축수업">
@@ -155,7 +156,7 @@
       <div class="event-actions">
         <button class="data-btn" onclick="setAcademicEventDateToday()">오늘 날짜</button>
         <button class="tt-auto-btn" onclick="saveAcademicEvent()">일정 저장</button>
-        <button class="tt-reset-btn" onclick="clearAcademicEventForm()">입력 초기화</button>
+        <button class="tt-reset-btn" onclick="startNewAcademicEvent()">새 일정</button>
       </div>
       <div class="event-list" id="academicEventList"></div>
       <div class="event-schedule-card" id="eventScheduleCard">

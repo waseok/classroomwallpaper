@@ -449,8 +449,15 @@ function clearAcademicEventForm() {
   specialTimetableDirty = false;
   saveViewData();
   fillAcademicEventForm();
+  updateAcademicEventSelectionBar();
   renderAcademicEventList();
   renderSpecialTimetableEditor();
+}
+
+function startNewAcademicEvent() {
+  clearAcademicEventForm();
+  const dateInput = document.getElementById('eventDateInput');
+  if (dateInput) dateInput.focus();
 }
 
 function setAcademicEventDateToday() {
@@ -479,6 +486,7 @@ function selectAcademicEvent(dateKey, options) {
   specialTimetableDirty = false;
   saveViewData();
   fillAcademicEventForm();
+  updateAcademicEventSelectionBar();
   renderAcademicEventList();
   renderSpecialTimetableEditor();
   flashAcademicEventForm();
@@ -490,6 +498,15 @@ function selectAcademicEvent(dateKey, options) {
   if (scheduleCard) scheduleCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   if (source === 'button') showToast('편집할 일정이 선택되었어요');
+}
+
+function updateAcademicEventSelectionBar() {
+  const bar = document.getElementById('eventSelectedBar');
+  if (!bar) return;
+  const selected = getSelectedAcademicEvent();
+  bar.textContent = selected
+    ? '현재 선택: ' + selected.date + ' · ' + selected.title
+    : '현재 선택: 새 일정 작성 중';
 }
 
 function renderAcademicEventList() {
@@ -507,8 +524,9 @@ function renderAcademicEventList() {
   }
 
   events.forEach(event => {
+    const isActive = event.date === viewData.selectedAcademicEventDate;
     const item = document.createElement('div');
-    item.className = 'event-item' + (event.date === viewData.selectedAcademicEventDate ? ' active' : '');
+    item.className = 'event-item' + (isActive ? ' active' : '');
 
     const body = document.createElement('div');
     body.className = 'event-item-body';
@@ -532,8 +550,14 @@ function renderAcademicEventList() {
     const actions = document.createElement('div');
     actions.className = 'event-item-actions';
 
+    if (isActive) {
+      const badge = document.createElement('span');
+      badge.className = 'event-item-badge';
+      badge.textContent = '현재 선택';
+      actions.appendChild(badge);
+    }
+
     const editBtn = document.createElement('button');
-    const isActive = event.date === viewData.selectedAcademicEventDate;
     editBtn.className = 'event-mini-btn' + (isActive ? ' active' : '');
     editBtn.textContent = isActive ? '선택됨' : '편집';
     editBtn.addEventListener('click', () => {
@@ -610,6 +634,7 @@ function deleteAcademicEvent(dateKey) {
   specialTimetableDirty = false;
   saveViewData();
   fillAcademicEventForm();
+  updateAcademicEventSelectionBar();
   renderAcademicEventList();
   renderSpecialTimetableEditor();
   updateAcademicEventBanner(new Date());
@@ -1802,6 +1827,7 @@ renderRules();
 initTabs();
 initAudio();
 applySecondsVisibility();
+updateAcademicEventSelectionBar();
 applyTimetableMode();
 updateClock();
 setInterval(updateClock, 1000);

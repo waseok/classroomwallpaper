@@ -1314,6 +1314,16 @@
     color: rgba(0,0,0,0.48);
   }
 
+  .event-selected-bar {
+    margin-bottom: 0.65rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 12px;
+    background: rgba(59, 130, 246, 0.08);
+    color: #2563eb;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
   .event-input,
   .event-textarea {
     width: 100%;
@@ -1399,6 +1409,7 @@
     display: flex;
     gap: 0.45rem;
     flex-shrink: 0;
+    align-items: center;
   }
 
   .event-mini-btn {
@@ -1421,6 +1432,16 @@
     background: rgba(139, 92, 246, 0.14);
     color: #6d28d9;
     border-color: rgba(139, 92, 246, 0.26);
+  }
+
+  .event-item-badge {
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
   }
 
   .event-mini-btn.delete:hover {

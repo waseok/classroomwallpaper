@@ -29,11 +29,12 @@ let rules = [];
 let isEditing = false;
 let timetable = [];
 let settings = { showRemaining: true, chimeEnabled: true, colonBlink: true, showSeconds: true, timetableMode: false, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
-let viewData = { activeTab: 'rules', notebook: '', notices: [] };
+let viewData = { activeTab: 'rules', notebook: '', notices: [], academicEvents: [], selectedAcademicEventDate: '' };
 let lastPeriodLabel = null;
 let lastChimeTime = 0;
 let audioCtx = null;
 let notebookTimer = null;
+let lastAcademicEventToastKey = '';
 
 let drag = {
   active: false, cardEl: null, index: -1, currentIndex: -1,
@@ -55,6 +56,84 @@ function timeToMins(str) {
 
 function minsToTime(mins) {
   return String(Math.floor(mins / 60)).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0');
+}
+
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+
+function cloneEntry(entry) {
+  return {
+    label: entry.label || '새 시간',
+    start: entry.start || '09:00',
+    end: entry.end || '09:40',
+    type: entry.type || 'in-class',
+    days: Array.isArray(entry.days) ? [...entry.days] : [1, 2, 3, 4, 5],
+    subjects: entry.subjects ? { ...entry.subjects } : {},
+    subject: entry.subject || '',
+  };
+}
+
+function normalizeAcademicEvent(event) {
+  const normalized = {
+    date: typeof event?.date === 'string' ? event.date : '',
+    title: typeof event?.title === 'string' ? event.title : '',
+    notice: typeof event?.notice === 'string' ? event.notice : '',
+    timetable: Array.isArray(event?.timetable) ? event.timetable.map(cloneEntry) : [],
+  };
+  normalized.timetable.sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+  return normalized;
+}
+
+function getAcademicEvents() {
+  if (!Array.isArray(viewData.academicEvents)) viewData.academicEvents = [];
+  return viewData.academicEvents;
+}
+
+function getAcademicEventByDate(dateKey) {
+  return getAcademicEvents().find(event => event.date === dateKey) || null;
+}
+
+function getSelectedAcademicEvent() {
+  return getAcademicEventByDate(viewData.selectedAcademicEventDate || '');
+}
+
+function getBaseEntriesForDate(dateObj) {
+  const day = dateObj.getDay();
+  const isWeekend = (day === 0 || day === 6);
+  if (isWeekend) return [];
+
+  let todayEntries = timetable
+    .filter(e => e.days.includes(day))
+    .sort((a, b) => timeToMins(a.start) - timeToMins(b.start))
+    .map(cloneEntry);
+
+  const maxPeriods = settings.dailyPeriods ? settings.dailyPeriods[day] : null;
+  if (maxPeriods) {
+    let periodCount = 0;
+    let lastPeriodEndMins = 0;
+    const filtered = [];
+    for (const e of todayEntries) {
+      if (/^\d+교시$/.test(e.label)) {
+        periodCount++;
+        if (periodCount <= maxPeriods) {
+          filtered.push(e);
+          lastPeriodEndMins = timeToMins(e.end);
+        }
+      } else {
+        filtered.push(e);
+      }
+    }
+    todayEntries = filtered.filter(e => {
+      if (/^\d+교시$/.test(e.label)) return true;
+      return timeToMins(e.start) < lastPeriodEndMins;
+    });
+  }
+
+  return todayEntries;
 }
 
 // =============================================
@@ -99,8 +178,16 @@ function saveSettings() { localStorage.setItem('classroomSettings', JSON.stringi
 function loadViewData() {
   try {
     const s = localStorage.getItem('classroomViewData');
-    if (s) viewData = JSON.parse(s);
+    if (s) viewData = { ...viewData, ...JSON.parse(s) };
   } catch { /* keep defaults */ }
+  if (!Array.isArray(viewData.notices)) viewData.notices = [];
+  if (!Array.isArray(viewData.academicEvents)) viewData.academicEvents = [];
+  viewData.academicEvents = viewData.academicEvents
+    .map(normalizeAcademicEvent)
+    .filter(event => event.date && event.title.trim());
+  if (viewData.selectedAcademicEventDate && !getAcademicEventByDate(viewData.selectedAcademicEventDate)) {
+    viewData.selectedAcademicEventDate = '';
+  }
 }
 function saveViewData() { localStorage.setItem('classroomViewData', JSON.stringify(viewData)); }
 
@@ -319,10 +406,319 @@ function openSettings() {
   renderDailyPeriods();
   renderTimetableEditor();
   renderSubjectGrid();
+  renderAcademicEventList();
+  fillAcademicEventForm();
+  renderSpecialTimetableEditor();
 }
 
 function closeSettings() {
   document.getElementById('settingsModal').classList.remove('open');
+}
+
+function fillAcademicEventForm() {
+  const selected = getSelectedAcademicEvent();
+  const dateInput = document.getElementById('eventDateInput');
+  const titleInput = document.getElementById('eventTitleInput');
+  const noticeInput = document.getElementById('eventNoticeInput');
+  if (!dateInput || !titleInput || !noticeInput) return;
+
+  dateInput.value = selected ? selected.date : '';
+  titleInput.value = selected ? selected.title : '';
+  noticeInput.value = selected ? selected.notice : '';
+}
+
+function clearAcademicEventForm() {
+  viewData.selectedAcademicEventDate = '';
+  saveViewData();
+  fillAcademicEventForm();
+  renderAcademicEventList();
+  renderSpecialTimetableEditor();
+}
+
+function renderAcademicEventList() {
+  const container = document.getElementById('academicEventList');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const events = getAcademicEvents().slice().sort((a, b) => a.date.localeCompare(b.date));
+  if (!events.length) {
+    const empty = document.createElement('div');
+    empty.className = 'event-empty';
+    empty.textContent = '등록된 학사 일정이 없습니다.';
+    container.appendChild(empty);
+    return;
+  }
+
+  events.forEach(event => {
+    const item = document.createElement('div');
+    item.className = 'event-item' + (event.date === viewData.selectedAcademicEventDate ? ' active' : '');
+
+    const body = document.createElement('div');
+    body.className = 'event-item-body';
+
+    const date = document.createElement('div');
+    date.className = 'event-item-date';
+    date.textContent = event.date;
+
+    const title = document.createElement('div');
+    title.className = 'event-item-title';
+    title.textContent = event.title;
+
+    const note = document.createElement('div');
+    note.className = 'event-item-note';
+    note.textContent = event.notice || '안내 문구 없음';
+
+    body.appendChild(date);
+    body.appendChild(title);
+    body.appendChild(note);
+
+    const actions = document.createElement('div');
+    actions.className = 'event-item-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'event-mini-btn';
+    editBtn.textContent = '편집';
+    editBtn.addEventListener('click', () => {
+      viewData.selectedAcademicEventDate = event.date;
+      saveViewData();
+      fillAcademicEventForm();
+      renderAcademicEventList();
+      renderSpecialTimetableEditor();
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'event-mini-btn delete';
+    delBtn.textContent = '삭제';
+    delBtn.addEventListener('click', () => deleteAcademicEvent(event.date));
+
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+    item.appendChild(body);
+    item.appendChild(actions);
+    container.appendChild(item);
+  });
+}
+
+function saveAcademicEvent() {
+  const dateInput = document.getElementById('eventDateInput');
+  const titleInput = document.getElementById('eventTitleInput');
+  const noticeInput = document.getElementById('eventNoticeInput');
+  const date = (dateInput?.value || '').trim();
+  const title = (titleInput?.value || '').trim();
+  const notice = (noticeInput?.value || '').trim();
+
+  if (!date || !title) {
+    alert('날짜와 일정 이름을 입력해주세요.');
+    return;
+  }
+
+  const events = getAcademicEvents();
+  const currentSelectedDate = viewData.selectedAcademicEventDate || '';
+  const selectedEvent = getAcademicEventByDate(currentSelectedDate);
+  const existingIndex = events.findIndex(event => event.date === date);
+
+  if (currentSelectedDate && currentSelectedDate !== date && existingIndex >= 0) {
+    alert('같은 날짜의 일정이 이미 있습니다. 기존 일정을 편집하거나 삭제해주세요.');
+    return;
+  }
+
+  if (selectedEvent) {
+    selectedEvent.date = date;
+    selectedEvent.title = title;
+    selectedEvent.notice = notice;
+    selectedEvent.timetable = (selectedEvent.timetable || []).map(cloneEntry).sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+  } else if (existingIndex >= 0) {
+    events[existingIndex].title = title;
+    events[existingIndex].notice = notice;
+  } else {
+    events.push(normalizeAcademicEvent({ date, title, notice, timetable: [] }));
+  }
+
+  viewData.selectedAcademicEventDate = date;
+  viewData.academicEvents = events
+    .map(normalizeAcademicEvent)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  saveViewData();
+  renderAcademicEventList();
+  fillAcademicEventForm();
+  renderSpecialTimetableEditor();
+  updateAcademicEventBanner(new Date());
+  if (settings.timetableMode) renderTimetableDisplay();
+  showToast('학사 일정이 저장되었어요');
+}
+
+function deleteAcademicEvent(dateKey) {
+  if (!confirm('이 학사 일정을 삭제할까요?')) return;
+  viewData.academicEvents = getAcademicEvents().filter(event => event.date !== dateKey);
+  if (viewData.selectedAcademicEventDate === dateKey) viewData.selectedAcademicEventDate = '';
+  saveViewData();
+  fillAcademicEventForm();
+  renderAcademicEventList();
+  renderSpecialTimetableEditor();
+  updateAcademicEventBanner(new Date());
+  if (settings.timetableMode) renderTimetableDisplay();
+  showToast('학사 일정이 삭제되었어요');
+}
+
+function renderSpecialTimetableEditor() {
+  const card = document.getElementById('eventScheduleCard');
+  const titleEl = document.getElementById('eventScheduleTitle');
+  const container = document.getElementById('specialTtList');
+  if (!card || !titleEl || !container) return;
+
+  const selected = getSelectedAcademicEvent();
+  if (!selected) {
+    card.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  card.style.display = '';
+  titleEl.textContent = selected.date + ' 날짜 전용 시간표';
+  container.innerHTML = '';
+
+  if (!selected.timetable.length) {
+    const empty = document.createElement('div');
+    empty.className = 'event-empty';
+    empty.textContent = '아직 날짜 전용 시간표가 없습니다. 기본 시간표를 불러오거나 새 시간을 추가하세요.';
+    container.appendChild(empty);
+    return;
+  }
+
+  selected.timetable.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'tt-row';
+
+    const labelInput = document.createElement('input');
+    labelInput.className = 'tt-label-input';
+    labelInput.type = 'text';
+    labelInput.value = entry.label;
+    labelInput.addEventListener('change', () => {
+      entry.label = labelInput.value.trim() || '새 시간';
+      saveAcademicEventTimetable();
+    });
+
+    const startInput = document.createElement('input');
+    startInput.className = 'tt-time-input';
+    startInput.type = 'time';
+    startInput.value = entry.start;
+    startInput.addEventListener('change', () => {
+      if (!startInput.value) return;
+      entry.start = startInput.value;
+      saveAcademicEventTimetable(true);
+    });
+
+    const sep = document.createElement('span');
+    sep.className = 'tt-separator';
+    sep.textContent = '~';
+
+    const endInput = document.createElement('input');
+    endInput.className = 'tt-time-input';
+    endInput.type = 'time';
+    endInput.value = entry.end;
+    endInput.addEventListener('change', () => {
+      if (!endInput.value) return;
+      entry.end = endInput.value;
+      saveAcademicEventTimetable(true);
+    });
+
+    const typeSelect = document.createElement('select');
+    typeSelect.className = 'tt-type-select';
+    [['in-class', '수업'], ['lunch-time', '점심'], ['break-time', '쉬는시간'], ['event-time', '행사']].forEach(([val, txt]) => {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = txt;
+      if (val === entry.type) opt.selected = true;
+      typeSelect.appendChild(opt);
+    });
+    typeSelect.addEventListener('change', () => {
+      entry.type = typeSelect.value;
+      saveAcademicEventTimetable();
+    });
+
+    const subjectInput = document.createElement('input');
+    subjectInput.className = 'subject-grid-input';
+    subjectInput.type = 'text';
+    subjectInput.placeholder = '세부 내용';
+    subjectInput.value = entry.subject || '';
+    subjectInput.addEventListener('input', () => {
+      entry.subject = subjectInput.value;
+      saveAcademicEventTimetable();
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'tt-delete-btn';
+    delBtn.innerHTML = '&#10005;';
+    delBtn.addEventListener('click', () => {
+      selected.timetable.splice(i, 1);
+      saveAcademicEventTimetable(true);
+      showToast('날짜별 시간이 삭제되었어요');
+    });
+
+    row.appendChild(labelInput);
+    row.appendChild(startInput);
+    row.appendChild(sep);
+    row.appendChild(endInput);
+    row.appendChild(typeSelect);
+    row.appendChild(subjectInput);
+    row.appendChild(delBtn);
+    container.appendChild(row);
+  });
+}
+
+function saveAcademicEventTimetable(shouldRerender) {
+  const selected = getSelectedAcademicEvent();
+  if (!selected) return;
+  selected.timetable = selected.timetable.map(cloneEntry).sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+  saveViewData();
+  if (shouldRerender) renderSpecialTimetableEditor();
+  updateAcademicEventBanner(new Date());
+  if (settings.timetableMode) renderTimetableDisplay();
+}
+
+function addSpecialTimetableEntry() {
+  const selected = getSelectedAcademicEvent();
+  if (!selected) {
+    alert('먼저 학사 일정을 저장해주세요.');
+    return;
+  }
+  const lastEntry = selected.timetable[selected.timetable.length - 1];
+  let startMins = lastEntry ? timeToMins(lastEntry.end) + 10 : 540;
+  let endMins = Math.min(startMins + 40, 1439);
+  selected.timetable.push({
+    label: (selected.timetable.length + 1) + '교시',
+    start: minsToTime(startMins),
+    end: minsToTime(endMins),
+    type: 'in-class',
+    subject: '',
+    subjects: {},
+    days: [],
+  });
+  saveAcademicEventTimetable(true);
+  showToast('날짜별 시간이 추가되었어요');
+}
+
+function copyDefaultTimetableToSelectedEvent() {
+  const selected = getSelectedAcademicEvent();
+  if (!selected) {
+    alert('먼저 학사 일정을 저장해주세요.');
+    return;
+  }
+  const sourceDate = new Date(selected.date + 'T09:00:00');
+  selected.timetable = getBaseEntriesForDate(sourceDate).map(entry => {
+    const subject = entry.subjects ? (entry.subjects[sourceDate.getDay()] || '') : '';
+    return {
+      label: entry.label,
+      start: entry.start,
+      end: entry.end,
+      type: entry.type,
+      subject,
+      subjects: {},
+      days: [],
+    };
+  });
+  saveAcademicEventTimetable(true);
+  showToast('기본 시간표를 날짜별 시간표로 불러왔어요');
 }
 
 // =============================================
@@ -881,18 +1277,11 @@ function renderTimetableDisplay() {
   container.innerHTML = '';
 
   const now = new Date();
-  const day = now.getDay();
   const mins = now.getHours() * 60 + now.getMinutes();
-  const isWeekend = (day === 0 || day === 6);
-
-  if (isWeekend) {
-    container.innerHTML = '<div class="timetable-empty-msg">주말에는 수업이 없어요</div>';
-    return;
-  }
-
   const entries = getTodayEntries(now);
   if (entries.length === 0) {
-    container.innerHTML = '<div class="timetable-empty-msg">오늘은 수업이 없어요</div>';
+    const event = getAcademicEventByDate(formatDateKey(now));
+    container.innerHTML = '<div class="timetable-empty-msg">' + (event ? '등록된 일정은 있지만 시간표는 없어요' : '오늘은 수업이 없어요') + '</div>';
     return;
   }
 
@@ -931,7 +1320,7 @@ function renderTimetableDisplay() {
 
     const subjectSpan = document.createElement('span');
     subjectSpan.className = 'tt-display-subject';
-    subjectSpan.textContent = entry.subjects[day] || '';
+    subjectSpan.textContent = entry.subject || (entry.subjects ? entry.subjects[now.getDay()] || '' : '');
 
     row.appendChild(label);
     row.appendChild(subjectSpan);
@@ -981,47 +1370,25 @@ function renderDailyPeriods() {
 // CLOCK & PERIOD DETECTION
 // =============================================
 function getTodayEntries(now) {
-  const day = now.getDay();
-  const isWeekend = (day === 0 || day === 6);
-  if (isWeekend) return [];
-
-  let todayEntries = timetable
-    .filter(e => e.days.includes(day))
-    .sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
-
-  const maxPeriods = settings.dailyPeriods ? settings.dailyPeriods[day] : null;
-  if (maxPeriods) {
-    let periodCount = 0;
-    let lastPeriodEndMins = 0;
-    const filtered = [];
-    for (const e of todayEntries) {
-      if (/^\d+교시$/.test(e.label)) {
-        periodCount++;
-        if (periodCount <= maxPeriods) {
-          filtered.push(e);
-          lastPeriodEndMins = timeToMins(e.end);
-        }
-      } else {
-        filtered.push(e);
-      }
-    }
-    todayEntries = filtered.filter(e => {
-      if (/^\d+교시$/.test(e.label)) return true;
-      return timeToMins(e.start) < lastPeriodEndMins;
-    });
+  const dateKey = formatDateKey(now);
+  const event = getAcademicEventByDate(dateKey);
+  if (event && event.timetable.length) {
+    return event.timetable.map(cloneEntry).sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
   }
-
-  return todayEntries;
+  return getBaseEntriesForDate(now);
 }
 
 function getCurrentPeriod(now) {
-  const day = now.getDay();
   const mins = now.getHours() * 60 + now.getMinutes();
-  const isWeekend = (day === 0 || day === 6);
-
-  if (isWeekend) return { label: '주말', type: 'off-time', endMins: null };
-
   const todayEntries = getTodayEntries(now);
+  const event = getAcademicEventByDate(formatDateKey(now));
+
+  if (!todayEntries.length && event) {
+    return { label: event.title, type: 'event-time', endMins: null, subject: event.notice };
+  }
+
+  const isWeekend = (now.getDay() === 0 || now.getDay() === 6);
+  if (isWeekend && !todayEntries.length) return { label: '주말', type: 'off-time', endMins: null };
 
   if (todayEntries.length === 0) return { label: '수업 없음', type: 'off-time', endMins: null };
 
@@ -1032,7 +1399,7 @@ function getCurrentPeriod(now) {
 
     // Currently in this period
     if (mins >= start && mins < end) {
-      const subject = entry.subjects ? (entry.subjects[day] || '') : '';
+      const subject = entry.subject || (entry.subjects ? (entry.subjects[now.getDay()] || '') : '');
       return { label: entry.label, type: entry.type, endMins: end, subject: subject };
     }
 
@@ -1067,6 +1434,7 @@ function updateClock() {
   document.getElementById('dateDisplay').textContent =
     n.getFullYear() + '. ' + String(n.getMonth() + 1).padStart(2, '0') + '. ' + String(n.getDate()).padStart(2, '0');
   document.getElementById('dayName').textContent = DAYS_KR[n.getDay()];
+  updateAcademicEventBanner(n);
 
   // Period alert with optional remaining time
   const period = getCurrentPeriod(n);
@@ -1112,6 +1480,38 @@ function updateClock() {
   // Update timetable display if in timetable mode
   if (settings.timetableMode) {
     renderTimetableDisplay();
+  }
+}
+
+function updateAcademicEventBanner(now) {
+  const banner = document.getElementById('academicEventBanner');
+  if (!banner) return;
+  const event = getAcademicEventByDate(formatDateKey(now));
+
+  if (!event) {
+    banner.classList.remove('show');
+    banner.textContent = '';
+    return;
+  }
+
+  banner.textContent = '';
+  const title = document.createElement('span');
+  title.className = 'academic-event-title';
+  title.textContent = event.title;
+  banner.appendChild(title);
+
+  const lines = (event.notice || '오늘 일정이 적용됩니다.').split('\n');
+  lines.forEach((line, index) => {
+    if (index > 0) banner.appendChild(document.createElement('br'));
+    banner.appendChild(document.createTextNode(line));
+  });
+  banner.classList.add('show');
+
+  const toastKey = event.date + '|' + event.title;
+  if (lastAcademicEventToastKey !== toastKey && sessionStorage.getItem('academicEventToast:' + toastKey) !== '1') {
+    sessionStorage.setItem('academicEventToast:' + toastKey, '1');
+    lastAcademicEventToastKey = toastKey;
+    showToast('오늘 일정: ' + event.title);
   }
 }
 

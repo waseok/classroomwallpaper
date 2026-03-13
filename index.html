@@ -20,6 +20,7 @@
     <div class="date-display" id="dateDisplay"></div>
     <div class="day-name" id="dayName"></div>
   </div>
+  <div class="academic-event-banner" id="academicEventBanner"></div>
   <div class="clock-container">
     <div class="ampm-display" id="ampmDisplay">오전</div>
     <div class="time-display" id="timeDisplay">12<span class="colon">:</span>00</div>
@@ -74,7 +75,7 @@
 
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
 <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="전체화면">&#x26F6;</button>
-<button class="version-label" onclick="openChangelog()">v1.3.0</button>
+<button class="version-label" onclick="openChangelog()">v1.4.0</button>
 
 <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
 
@@ -144,6 +145,30 @@
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-title">학사 일정 / 날짜별 시간표</div>
+      <div class="event-form-grid">
+        <input type="date" class="event-input" id="eventDateInput">
+        <input type="text" class="event-input" id="eventTitleInput" placeholder="예: 체험학습, 단축수업">
+      </div>
+      <textarea class="event-textarea" id="eventNoticeInput" placeholder="왼쪽 패널에 보여줄 안내 문구를 입력하세요."></textarea>
+      <div class="event-actions">
+        <button class="tt-auto-btn" onclick="saveAcademicEvent()">일정 저장</button>
+        <button class="tt-reset-btn" onclick="clearAcademicEventForm()">입력 초기화</button>
+      </div>
+      <div class="event-list" id="academicEventList"></div>
+      <div class="event-schedule-card" id="eventScheduleCard" style="display:none;">
+        <div class="event-schedule-header">
+          <div class="event-schedule-title" id="eventScheduleTitle">날짜별 시간표</div>
+          <div class="event-schedule-actions">
+            <button class="tt-reset-btn" onclick="copyDefaultTimetableToSelectedEvent()">기본 시간표 불러오기</button>
+            <button class="tt-add-btn event-add-btn" onclick="addSpecialTimetableEntry()">+ 새 시간 추가</button>
+          </div>
+        </div>
+        <div class="tt-list" id="specialTtList"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-title">과목 편집</div>
       <div class="subject-grid" id="subjectGrid"></div>
     </div>
@@ -165,6 +190,12 @@
       <button class="modal-close" onclick="closeChangelog()">&#10005;</button>
     </div>
     <div class="changelog-list">
+      <div class="changelog-item">
+        <div class="changelog-item-header">
+          <span class="changelog-version">v1.4.0</span>
+        </div>
+        <div class="changelog-desc">학사 일정 입력, 날짜별 알림 표시, 특정 날짜 전용 시간표 편집 기능 추가</div>
+      </div>
       <div class="changelog-item">
         <div class="changelog-item-header">
           <span class="changelog-version">v1.3.0</span>

@@ -117,6 +117,16 @@
     animation: fadeSlideUp 1s ease-out 0.6s both;
   }
 
+  .left-panel.hide-seconds .seconds-display {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    height: 0;
+    margin-top: 0;
+    overflow: hidden;
+    animation: none;
+  }
+
   .period-alert {
     position: absolute;
     bottom: 12%;

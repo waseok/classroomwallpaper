@@ -74,7 +74,7 @@
 
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
 <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="전체화면">&#x26F6;</button>
-<button class="version-label" onclick="openChangelog()">v1.2.0</button>
+<button class="version-label" onclick="openChangelog()">v1.3.0</button>
 
 <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
 
@@ -105,6 +105,13 @@
         <span class="toggle-label">콜론 깜빡임</span>
         <label class="toggle-switch">
           <input type="checkbox" id="colonBlinkToggle" onchange="toggleColonBlink()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">초 시계 표시</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="secondsToggle" onchange="toggleSecondsDisplay()">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -158,6 +165,12 @@
       <button class="modal-close" onclick="closeChangelog()">&#10005;</button>
     </div>
     <div class="changelog-list">
+      <div class="changelog-item">
+        <div class="changelog-item-header">
+          <span class="changelog-version">v1.3.0</span>
+        </div>
+        <div class="changelog-desc">왼쪽 패널 시계의 초 표시를 설정에서 켜고 끌 수 있는 토글 추가</div>
+      </div>
       <div class="changelog-item">
         <div class="changelog-item-header">
           <span class="changelog-version">v1.2.0</span>

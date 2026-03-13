@@ -28,7 +28,7 @@ const DEFAULT_TIMETABLE = [
 let rules = [];
 let isEditing = false;
 let timetable = [];
-let settings = { showRemaining: true, chimeEnabled: true, colonBlink: true, timetableMode: false, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
+let settings = { showRemaining: true, chimeEnabled: true, colonBlink: true, showSeconds: true, timetableMode: false, dailyPeriods: { 1:5, 2:6, 3:5, 4:5, 5:5 } };
 let viewData = { activeTab: 'rules', notebook: '', notices: [] };
 let lastPeriodLabel = null;
 let lastChimeTime = 0;
@@ -89,6 +89,7 @@ function loadSettings() {
       if (!settings.dailyPeriods) settings.dailyPeriods = { 1:5, 2:6, 3:5, 4:5, 5:5 };
       if (settings.chimeEnabled === undefined) settings.chimeEnabled = true;
       if (settings.colonBlink === undefined) settings.colonBlink = true;
+      if (settings.showSeconds === undefined) settings.showSeconds = true;
       if (settings.timetableMode === undefined) settings.timetableMode = false;
     }
   } catch { /* keep defaults */ }
@@ -313,6 +314,7 @@ function openSettings() {
   document.getElementById('showRemainingToggle').checked = settings.showRemaining;
   document.getElementById('chimeToggle').checked = settings.chimeEnabled;
   document.getElementById('colonBlinkToggle').checked = settings.colonBlink;
+  document.getElementById('secondsToggle').checked = settings.showSeconds;
   document.getElementById('timetableModeToggle').checked = settings.timetableMode;
   renderDailyPeriods();
   renderTimetableEditor();
@@ -832,6 +834,18 @@ function applyColonBlink() {
   });
 }
 
+function toggleSecondsDisplay() {
+  settings.showSeconds = document.getElementById('secondsToggle').checked;
+  applySecondsVisibility();
+  saveSettings();
+}
+
+function applySecondsVisibility() {
+  const panel = document.getElementById('leftPanel');
+  if (!panel) return;
+  panel.classList.toggle('hide-seconds', !settings.showSeconds);
+}
+
 // =============================================
 // TIMETABLE MODE (LEFT PANEL DISPLAY)
 // =============================================
@@ -1309,6 +1323,7 @@ loadViewData();
 renderRules();
 initTabs();
 initAudio();
+applySecondsVisibility();
 applyTimetableMode();
 updateClock();
 setInterval(updateClock, 1000);

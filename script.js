@@ -136,6 +136,22 @@ function getBaseEntriesForDate(dateObj) {
   return todayEntries;
 }
 
+function buildSpecialTimetableFromBase(dateKey) {
+  const sourceDate = new Date(dateKey + 'T09:00:00');
+  return getBaseEntriesForDate(sourceDate).map(entry => {
+    const subject = entry.subjects ? (entry.subjects[sourceDate.getDay()] || '') : '';
+    return {
+      label: entry.label,
+      start: entry.start,
+      end: entry.end,
+      type: entry.type,
+      subject,
+      subjects: {},
+      days: [],
+    };
+  });
+}
+
 // =============================================
 // LOAD / SAVE
 // =============================================
@@ -435,6 +451,12 @@ function clearAcademicEventForm() {
   renderSpecialTimetableEditor();
 }
 
+function setAcademicEventDateToday() {
+  const dateInput = document.getElementById('eventDateInput');
+  if (!dateInput) return;
+  dateInput.value = formatDateKey(new Date());
+}
+
 function renderAcademicEventList() {
   const container = document.getElementById('academicEventList');
   if (!container) return;
@@ -538,6 +560,10 @@ function saveAcademicEvent() {
   viewData.academicEvents = events
     .map(normalizeAcademicEvent)
     .sort((a, b) => a.date.localeCompare(b.date));
+  const savedEvent = getAcademicEventByDate(date);
+  if (savedEvent && !savedEvent.timetable.length) {
+    savedEvent.timetable = buildSpecialTimetableFromBase(date);
+  }
   saveViewData();
   renderAcademicEventList();
   fillAcademicEventForm();
@@ -568,8 +594,9 @@ function renderSpecialTimetableEditor() {
 
   const selected = getSelectedAcademicEvent();
   if (!selected) {
-    card.style.display = 'none';
-    container.innerHTML = '';
+    card.style.display = '';
+    titleEl.textContent = '날짜별 시간표';
+    container.innerHTML = '<div class="event-schedule-placeholder">일정을 저장하거나 목록에서 편집을 누르면<br>이 아래에서 해당 날짜 전용 시간표를 수정할 수 있습니다.</div>';
     return;
   }
 
@@ -704,19 +731,7 @@ function copyDefaultTimetableToSelectedEvent() {
     alert('먼저 학사 일정을 저장해주세요.');
     return;
   }
-  const sourceDate = new Date(selected.date + 'T09:00:00');
-  selected.timetable = getBaseEntriesForDate(sourceDate).map(entry => {
-    const subject = entry.subjects ? (entry.subjects[sourceDate.getDay()] || '') : '';
-    return {
-      label: entry.label,
-      start: entry.start,
-      end: entry.end,
-      type: entry.type,
-      subject,
-      subjects: {},
-      days: [],
-    };
-  });
+  selected.timetable = buildSpecialTimetableFromBase(selected.date);
   saveAcademicEventTimetable(true);
   showToast('기본 시간표를 날짜별 시간표로 불러왔어요');
 }

@@ -1307,6 +1307,13 @@
     margin-bottom: 0.6rem;
   }
 
+  .event-help-text {
+    margin-bottom: 0.7rem;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: rgba(0,0,0,0.48);
+  }
+
   .event-input,
   .event-textarea {
     width: 100%;
@@ -1443,6 +1450,15 @@
   .event-schedule-title {
     font-weight: 900;
     color: #6d28d9;
+  }
+
+  .event-schedule-placeholder {
+    padding: 1rem;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.55);
+    color: rgba(0,0,0,0.42);
+    text-align: center;
+    line-height: 1.6;
   }
 
   .event-schedule-actions {

@@ -203,6 +203,7 @@ function loadSettings() {
       if (settings.showSeconds === undefined) settings.showSeconds = true;
       if (settings.timetableMode === undefined) settings.timetableMode = false;
       if (settings.morningSlotMigrated === undefined) settings.morningSlotMigrated = false;
+      if (settings.voiceAlertEnabled === undefined) settings.voiceAlertEnabled = false;
     }
   } catch { /* keep defaults */ }
 }
@@ -436,6 +437,7 @@ function openSettings() {
   document.getElementById('colonBlinkToggle').checked = settings.colonBlink;
   document.getElementById('secondsToggle').checked = settings.showSeconds;
   document.getElementById('timetableModeToggle').checked = settings.timetableMode;
+  document.getElementById('voiceAlertToggle').checked = settings.voiceAlertEnabled;
   renderDailyPeriods();
   renderTimetableEditor();
   renderSubjectGrid();
@@ -1644,6 +1646,9 @@ function updateClock() {
   if (settings.timetableMode) {
     renderTimetableDisplay();
   }
+
+  // Voice alert check
+  checkVoiceAlert(n);
 }
 
 function updateAcademicEventBanner(now) {
@@ -1686,7 +1691,8 @@ function exportData() {
     classroomRules: localStorage.getItem('classroomRules'),
     classroomTimetable: localStorage.getItem('classroomTimetable'),
     classroomSettings: localStorage.getItem('classroomSettings'),
-    classroomViewData: localStorage.getItem('classroomViewData')
+    classroomViewData: localStorage.getItem('classroomViewData'),
+    classroomRandomStudents: localStorage.getItem('classroomRandomStudents')
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -1717,7 +1723,7 @@ function handleImport(e) {
   reader.onload = function(ev) {
     try {
       const data = JSON.parse(ev.target.result);
-      const keys = ['classroomRules', 'classroomTimetable', 'classroomSettings', 'classroomViewData'];
+      const keys = ['classroomRules', 'classroomTimetable', 'classroomSettings', 'classroomViewData', 'classroomRandomStudents'];
       keys.forEach(function(key) {
         if (data[key] !== undefined && data[key] !== null) {
           localStorage.setItem(key, data[key]);
@@ -1879,12 +1885,184 @@ function updateCounterDisplay(today, total) {
 }
 
 // =============================================
+// RANDOM PICKER
+// =============================================
+let randomStudents = [];
+let randomPicked = [];
+let randomSpinTimer = null;
+
+function loadRandomStudents() {
+  try {
+    const s = localStorage.getItem('classroomRandomStudents');
+    randomStudents = s ? JSON.parse(s) : [];
+  } catch { randomStudents = []; }
+  try {
+    const p = localStorage.getItem('classroomRandomPicked');
+    randomPicked = p ? JSON.parse(p) : [];
+  } catch { randomPicked = []; }
+}
+
+function saveRandomStudents() {
+  localStorage.setItem('classroomRandomStudents', JSON.stringify(randomStudents));
+  localStorage.setItem('classroomRandomPicked', JSON.stringify(randomPicked));
+}
+
+function openRandomPicker() {
+  loadRandomStudents();
+  document.getElementById('randomPickerModal').classList.add('open');
+  document.getElementById('randomStudentInput').value = randomStudents.join('\n');
+  document.getElementById('randomStudentCount').textContent = randomStudents.length + '명';
+  renderRandomPickedList();
+  updateRandomDisplay();
+}
+
+function closeRandomPicker() {
+  document.getElementById('randomPickerModal').classList.remove('open');
+  if (randomSpinTimer) { clearInterval(randomSpinTimer); randomSpinTimer = null; }
+}
+
+function onRandomStudentInput() {
+  const text = document.getElementById('randomStudentInput').value;
+  randomStudents = text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+  document.getElementById('randomStudentCount').textContent = randomStudents.length + '명';
+  saveRandomStudents();
+  updateRandomDisplay();
+}
+
+function getAvailableStudents() {
+  return randomStudents.filter(s => !randomPicked.includes(s));
+}
+
+function updateRandomDisplay() {
+  const available = getAvailableStudents();
+  const btn = document.getElementById('randomGoBtn');
+  const info = document.getElementById('randomPickedInfo');
+  if (randomStudents.length === 0) {
+    document.getElementById('randomDisplay').textContent = '?';
+    info.textContent = '학생을 등록해주세요';
+    btn.disabled = true;
+  } else if (available.length === 0) {
+    info.textContent = '모두 뽑았어요! (' + randomPicked.length + '/' + randomStudents.length + ')';
+    btn.disabled = true;
+  } else {
+    info.textContent = randomPicked.length + ' / ' + randomStudents.length + '명 뽑음';
+    btn.disabled = false;
+  }
+}
+
+function doRandomPick() {
+  const available = getAvailableStudents();
+  if (available.length === 0) return;
+
+  const display = document.getElementById('randomDisplay');
+  const btn = document.getElementById('randomGoBtn');
+  btn.disabled = true;
+  display.classList.remove('picked');
+  display.classList.add('spinning');
+
+  let count = 0;
+  const totalSpins = 15;
+  randomSpinTimer = setInterval(() => {
+    display.textContent = available[Math.floor(Math.random() * available.length)];
+    count++;
+    if (count >= totalSpins) {
+      clearInterval(randomSpinTimer);
+      randomSpinTimer = null;
+
+      const picked = available[Math.floor(Math.random() * available.length)];
+      display.textContent = picked;
+      display.classList.remove('spinning');
+      display.classList.add('picked');
+      randomPicked.push(picked);
+      saveRandomStudents();
+      renderRandomPickedList();
+      updateRandomDisplay();
+    }
+  }, 80);
+}
+
+function resetRandomPick() {
+  randomPicked = [];
+  saveRandomStudents();
+  document.getElementById('randomDisplay').textContent = '?';
+  document.getElementById('randomDisplay').classList.remove('picked', 'spinning');
+  renderRandomPickedList();
+  updateRandomDisplay();
+  showToast('뽑기가 초기화되었어요');
+}
+
+function renderRandomPickedList() {
+  const container = document.getElementById('randomPickedList');
+  container.innerHTML = '';
+  randomPicked.forEach(name => {
+    const tag = document.createElement('span');
+    tag.className = 'random-picked-tag';
+    tag.textContent = name;
+    container.appendChild(tag);
+  });
+}
+
+// =============================================
+// VOICE ALERT (쉬는 시간 음성 안내)
+// =============================================
+let lastVoiceAlertKey = '';
+
+function toggleVoiceAlert() {
+  settings.voiceAlertEnabled = document.getElementById('voiceAlertToggle').checked;
+  saveSettings();
+}
+
+function checkVoiceAlert(now) {
+  if (!settings.voiceAlertEnabled) return;
+  if (!('speechSynthesis' in window)) return;
+
+  const period = getCurrentPeriod(now);
+  if (period.type !== 'break-time' && period.type !== 'lunch-time') {
+    lastVoiceAlertKey = '';
+    return;
+  }
+
+  if (period.endMins === null) return;
+
+  const currentSecs = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const endSecs = period.endMins * 60;
+  const remaining = endSecs - currentSecs;
+
+  const alerts = [
+    { secs: 300, msg: '5분 남았습니다. 자리로 돌아와주세요.' },
+    { secs: 60, msg: '1분 남았습니다. 수업 준비해주세요.' },
+  ];
+
+  for (const alert of alerts) {
+    const key = period.label + '-' + period.endMins + '-' + alert.secs;
+    if (remaining <= alert.secs && remaining > alert.secs - 2 && lastVoiceAlertKey !== key) {
+      lastVoiceAlertKey = key;
+      const typeName = period.type === 'lunch-time' ? '점심시간' : '쉬는 시간';
+      speakText(typeName + ' ' + alert.msg);
+      return;
+    }
+  }
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+  window.speechSynthesis.speak(utter);
+}
+
+// =============================================
 // INIT
 // =============================================
 loadSettings();
 loadTimetable();
 loadRules();
 loadViewData();
+loadRandomStudents();
 renderRules();
 initTabs();
 initAudio();

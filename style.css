@@ -707,7 +707,7 @@
   .version-label {
     position: fixed;
     bottom: 1.5rem;
-    left: 7.5rem;
+    left: 13.5rem;
     height: 44px;
     border-radius: 22px;
     border: 1.5px solid rgba(0,0,0,0.08);
@@ -1765,3 +1765,178 @@
     height: 14px;
     background: rgba(0,0,0,0.1);
   }
+
+  /* ========== Random Pick Button ========== */
+  .random-pick-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 10.5rem;
+    height: 44px;
+    width: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: rgba(0,0,0,0.35);
+    transition: all 0.3s;
+    z-index: 10;
+  }
+  .random-pick-btn:hover {
+    background: rgba(236, 72, 153, 0.12);
+    color: #ec4899;
+    border-color: rgba(236, 72, 153, 0.3);
+  }
+
+  /* ========== Random Picker Modal ========== */
+  .random-picker-card {
+    max-width: 500px;
+  }
+  .random-picker-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+  }
+  .random-display {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 5rem;
+    color: #ec4899;
+    -webkit-text-fill-color: #ec4899;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 20px;
+    background: rgba(236, 72, 153, 0.06);
+    border: 1.5px solid rgba(236, 72, 153, 0.15);
+    transition: all 0.3s;
+    line-height: 1.2;
+  }
+  .random-display.spinning {
+    animation: randomSpin 0.08s linear infinite;
+  }
+  @keyframes randomSpin {
+    0% { transform: translateY(-2px); }
+    50% { transform: translateY(2px); }
+    100% { transform: translateY(-2px); }
+  }
+  .random-display.picked {
+    animation: randomPop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    background: rgba(236, 72, 153, 0.12);
+    border-color: rgba(236, 72, 153, 0.3);
+  }
+  @keyframes randomPop {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .random-picked-info {
+    font-size: 0.9rem;
+    color: rgba(0,0,0,0.4);
+    font-weight: 700;
+  }
+  .random-btn-row {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  .random-go-btn {
+    flex: 1;
+    padding: 0.85rem 1.5rem;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #ec4899, #f472b6);
+    color: #fff;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 900;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  }
+  .random-go-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+  }
+  .random-go-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .random-reset-btn {
+    padding: 0.85rem 1.2rem;
+    border-radius: 14px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.5);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .random-reset-btn:hover { background: rgba(255,255,255,0.8); color: #666; }
+  .random-picked-list {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-height: 0;
+  }
+  .random-picked-tag {
+    padding: 0.3rem 0.7rem;
+    border-radius: 10px;
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid rgba(236, 72, 153, 0.2);
+  }
+  .random-students-section {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .random-section-title {
+    font-weight: 900;
+    font-size: 0.95rem;
+    color: #2d2a26;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .random-count {
+    font-size: 0.8rem;
+    color: #ec4899;
+    font-weight: 700;
+  }
+  .random-student-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(12px);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #2d2a26;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .random-student-textarea:focus {
+    border-color: rgba(236, 72, 153, 0.4);
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+  }
+  .random-student-textarea::placeholder { color: rgba(0,0,0,0.25); }

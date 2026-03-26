@@ -82,7 +82,7 @@
 <button class="settings-btn" onclick="openSettings()">&#9881;</button>
 <button class="random-pick-btn" onclick="openRandomPicker()" title="랜덤 뽑기">&#127922;</button>
 <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullscreen()" title="전체화면">&#x26F6;</button>
-<button class="version-label" onclick="openChangelog()">v1.5.0</button>
+<button class="version-label" onclick="openChangelog()">v1.5.1</button>
 
 <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImport(event)">
 
@@ -209,6 +209,12 @@
       <button class="modal-close" onclick="closeChangelog()">&#10005;</button>
     </div>
     <div class="changelog-list">
+      <div class="changelog-item">
+        <div class="changelog-item-header">
+          <span class="changelog-version">v1.5.1</span>
+        </div>
+        <div class="changelog-desc">시간표 레일 게이지를 기차 이동 스타일로 개선, 알림장 패널 채우기 상단 여백 수정</div>
+      </div>
       <div class="changelog-item">
         <div class="changelog-item-header">
           <span class="changelog-version">v1.5.0</span>
